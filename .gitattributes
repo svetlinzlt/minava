@@ -1,0 +1,11 @@
+# Хранилището пази LF. Проектът се строи на macOS с Xcode; смесени
+# окончания на редовете правят diff-овете нечетими без причина.
+* text=auto eol=lf
+
+# Двоични файлове — без пипане
+*.png binary
+*.jpg binary
+*.pdf binary
+*.mp3 binary
+*.caf binary
+*.ahap binary
