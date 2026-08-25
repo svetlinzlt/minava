@@ -1,0 +1,34 @@
+# macOS
+.DS_Store
+
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+*.xcuserdatad/
+xcuserdata/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# Пакети и подписване — никога в хранилището
+*.mobileprovision
+*.p12
+*.cer
+*.certSigningRequest
+ExportOptions.plist
+
+# Локални настройки на редактора
+.idea/
+.vscode/
+
+# Локални тайни
+.env
+*.local
