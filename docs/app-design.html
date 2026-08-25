@@ -1,0 +1,823 @@
+<title>Minava Екрани</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,600&family=Onest:wght@300;400;500;600&display=swap">
+
+<style>
+:root {
+  --ground:      #E9EFE7;
+  --surface:     #FCFDFB;
+  --surface-2:   #DDE7DB;
+  --text:        #17241C;
+  --text-2:      #47574C;
+  --text-3:      #606E64;
+  --rule:        #CAD7C7;
+  --accent:      #1F7342;
+  --accent-2:    #17572F;
+  --accent-soft: #D8E7D9;
+  --device:      #BDCABA;
+  --device-bar:  #A9B7A6;
+  --shadow:      0 24px 48px -28px rgba(23, 36, 28, .38);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:      #101710;
+    --surface:     #18211A;
+    --surface-2:   #212C23;
+    --text:        #E4EDE3;
+    --text-2:      #9DAB9E;
+    --text-3:      #7A8A7D;
+    --rule:        #2A362C;
+    --accent:      #74CE8F;
+    --accent-2:    #9BDCAF;
+    --accent-soft: #17301E;
+    --device:      #2E3D30;
+    --device-bar:  #47574A;
+    --shadow:      0 24px 48px -28px rgba(0, 0, 0, .8);
+  }
+}
+
+:root[data-theme="dark"] {
+  --ground:      #101710;
+  --surface:     #18211A;
+  --surface-2:   #212C23;
+  --text:        #E4EDE3;
+  --text-2:      #9DAB9E;
+  --text-3:      #7A8A7D;
+  --rule:        #2A362C;
+  --accent:      #74CE8F;
+  --accent-2:    #9BDCAF;
+  --accent-soft: #17301E;
+  --device:      #2E3D30;
+  --device-bar:  #47574A;
+  --shadow:      0 24px 48px -28px rgba(0, 0, 0, .8);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--ground);
+  color: var(--text);
+  font-family: "Onest", system-ui, sans-serif;
+  font-weight: 300;
+  font-size: 16.5px;
+  line-height: 1.62;
+  margin: 0;
+  padding: 0 24px 100px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 1040px; margin: 0 auto; }
+
+/* ─────────── masthead ─────────── */
+
+.masthead { padding: 84px 0 40px; border-bottom: 1px solid var(--rule); }
+
+.eyebrow {
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  margin: 0 0 22px;
+}
+
+h1 {
+  font-family: "Literata", Georgia, serif;
+  font-weight: 300;
+  font-size: clamp(2.2rem, 6.5vw, 3.3rem);
+  line-height: 1.08;
+  letter-spacing: -.02em;
+  text-wrap: balance;
+  margin: 0 0 24px;
+  max-width: 20ch;
+}
+
+.standfirst {
+  font-size: 1.08rem;
+  color: var(--text-2);
+  max-width: 56ch;
+  margin: 0;
+}
+
+/* ─────────── generic sections ─────────── */
+
+section { padding: 76px 0 0; }
+
+h2 {
+  font-family: "Literata", Georgia, serif;
+  font-weight: 300;
+  font-size: clamp(1.5rem, 4vw, 1.95rem);
+  line-height: 1.2;
+  letter-spacing: -.014em;
+  margin: 0 0 18px;
+  text-wrap: balance;
+}
+
+.sec-intro { color: var(--text-2); max-width: 60ch; margin: 0 0 34px; }
+
+/* ─────────── tokens ─────────── */
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 14px;
+  margin-top: 26px;
+}
+
+.sw { border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
+.sw-chip { height: 76px; }
+.sw-meta { padding: 11px 13px 13px; }
+.sw-name { font-size: .9rem; color: var(--text); display: block; }
+.sw-hex {
+  font-size: .76rem; color: var(--text-3); letter-spacing: .06em;
+  font-variant-numeric: tabular-nums; display: block; margin-top: 2px;
+}
+.sw-why { font-size: .78rem; color: var(--text-2); margin-top: 7px; line-height: 1.45; }
+
+.type-specimen {
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 26px 26px 24px;
+  margin-top: 14px;
+}
+
+.spec-line {
+  font-family: "Literata", Georgia, serif;
+  font-weight: 300;
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  line-height: 1.15;
+  margin: 0 0 12px;
+}
+
+.spec-line.sans { font-family: "Onest", sans-serif; font-weight: 300; }
+
+.spec-meta { font-size: .82rem; color: var(--text-3); margin: 0; }
+
+/* ─────────── screen rows ─────────── */
+
+.screen {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 52px;
+  align-items: start;
+  padding: 62px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.screen:first-of-type { padding-top: 34px; }
+
+.screen-notes h3 {
+  font-family: "Literata", Georgia, serif;
+  font-weight: 400;
+  font-size: 1.35rem;
+  margin: 0 0 6px;
+  letter-spacing: -.01em;
+}
+
+.screen-step {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  margin: 0 0 14px;
+}
+
+.screen-notes p { color: var(--text-2); margin: 0 0 14px; max-width: 52ch; font-size: .97rem; }
+
+.decisions { list-style: none; padding: 0; margin: 22px 0 0; display: flex; flex-direction: column; gap: 12px; }
+
+.decisions li {
+  position: relative;
+  padding-left: 26px;
+  font-size: .93rem; color: var(--text-2); max-width: 52ch;
+}
+
+.decisions li::before {
+  content: ""; position: absolute; left: 0; top: .68em;
+  width: 13px; height: 1px; background: var(--accent-2);
+}
+
+.decisions b { color: var(--text); font-weight: 500; }
+
+/* ─────────── phone ─────────── */
+
+.phone {
+  width: 300px;
+  aspect-ratio: 393 / 852;
+  border-radius: 46px;
+  border: 9px solid var(--device);
+  background: var(--ground);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.island {
+  position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
+  width: 88px; height: 25px; background: #000; border-radius: 20px; z-index: 5;
+}
+
+.statusbar {
+  position: absolute; top: 15px; left: 0; right: 0;
+  display: flex; justify-content: space-between;
+  padding: 0 26px; font-size: 11px; color: var(--text-2);
+  letter-spacing: .02em; z-index: 4;
+}
+
+.homebar {
+  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+  width: 108px; height: 4px; border-radius: 4px; background: var(--device-bar); z-index: 5;
+}
+
+.canvas {
+  position: absolute; inset: 0;
+  padding: 62px 26px 34px;
+  display: flex; flex-direction: column;
+}
+
+/* panic screen bits */
+
+.phase-word {
+  font-family: "Literata", Georgia, serif;
+  font-weight: 300;
+  font-size: 2.7rem;
+  line-height: 1;
+  letter-spacing: -.02em;
+  margin: 0;
+  color: var(--text);
+}
+
+.phase-secs {
+  font-size: 3.6rem;
+  font-weight: 300;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  margin: 0;
+  letter-spacing: -.03em;
+}
+
+.mini-trace { width: 100%; height: 66px; display: block; }
+.mt-bed  { fill: none; stroke: var(--rule); stroke-width: 2; stroke-linecap: round; }
+.mt-live { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; }
+.mt-dot  { fill: var(--accent); }
+.mt-glow { fill: var(--accent); opacity: .18; }
+
+.helpline {
+  margin-top: auto;
+  font-size: .78rem;
+  color: var(--text-3);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  text-align: center;
+  padding-bottom: 4px;
+}
+
+/* lock screen */
+
+.lock-time {
+  font-family: "Onest", sans-serif;
+  font-weight: 300;
+  font-size: 4.4rem;
+  line-height: 1;
+  letter-spacing: -.03em;
+  color: var(--text);
+  margin: 24px 0 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.lock-date { font-size: .88rem; color: var(--text-2); margin: 0; }
+
+.lock-widget {
+  margin-top: auto;
+  border: 1px solid var(--rule);
+  background: var(--accent-soft);
+  border-radius: 16px;
+  padding: 15px 17px;
+  display: flex; align-items: center; gap: 14px;
+}
+
+.lock-widget svg { flex: none; }
+.lw-label { font-size: .96rem; color: var(--text); line-height: 1.25; }
+.lw-sub { font-size: .75rem; color: var(--text-3); display: block; margin-top: 2px; }
+
+/* generic app rows */
+
+.app-h {
+  font-family: "Literata", Georgia, serif;
+  font-weight: 300;
+  font-size: 1.75rem;
+  line-height: 1.15;
+  margin: 0 0 6px;
+  letter-spacing: -.015em;
+}
+
+.app-sub { font-size: .86rem; color: var(--text-2); margin: 0 0 26px; line-height: 1.5; }
+
+.calltile {
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+
+.calltile .ct-num {
+  font-size: 1.28rem; color: var(--text); font-variant-numeric: tabular-nums;
+  letter-spacing: .03em; display: block; line-height: 1.2;
+}
+
+.calltile .ct-name { font-size: .75rem; color: var(--text-3); display: block; margin-top: 3px; }
+.calltile.is-first { border-color: var(--accent-2); background: var(--accent-soft); }
+.calltile.is-first .ct-num { color: var(--accent); }
+
+.bigchoice {
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 18px 18px;
+  font-size: 1.05rem;
+  color: var(--text);
+  margin-bottom: 12px;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+}
+
+.scale-row { display: flex; gap: 7px; margin-top: 4px; }
+
+.scale-dot {
+  flex: 1; height: 46px; border: 1px solid var(--rule); border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .88rem; color: var(--text-3); font-variant-numeric: tabular-nums;
+}
+
+.scale-dot.on { border-color: var(--accent-2); background: var(--accent-soft); color: var(--accent); }
+
+.entry-log { display: flex; flex-direction: column; gap: 0; margin-top: 6px; }
+
+.log-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 13px 0; border-bottom: 1px solid var(--rule); gap: 12px;
+}
+
+.log-when { font-size: .88rem; color: var(--text-2); }
+.log-len { font-size: .8rem; color: var(--text-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.trend {
+  border: 1px solid var(--rule); border-radius: 12px; padding: 16px 17px; margin-bottom: 22px;
+}
+
+.trend-big {
+  font-size: 2.1rem; color: var(--text); font-variant-numeric: tabular-nums;
+  line-height: 1.1; letter-spacing: -.02em;
+}
+
+.trend-label { font-size: .78rem; color: var(--text-3); margin-top: 4px; line-height: 1.4; }
+
+/* watch */
+
+.watch {
+  width: 190px;
+  aspect-ratio: 198 / 242;
+  border-radius: 52px;
+  border: 9px solid var(--device);
+  background: var(--ground);
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto;
+  box-shadow: var(--shadow);
+}
+
+.watch-canvas {
+  position: absolute; inset: 0; padding: 26px 20px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+}
+
+.watch-phase {
+  font-family: "Literata", Georgia, serif; font-weight: 300;
+  font-size: 1.55rem; color: var(--text); margin: 0 0 4px; line-height: 1;
+}
+
+.watch-secs {
+  font-size: 2.5rem; color: var(--accent); font-variant-numeric: tabular-nums;
+  line-height: 1; font-weight: 300; letter-spacing: -.02em;
+}
+
+.watch-note {
+  font-size: .66rem; color: var(--text-3); letter-spacing: .12em;
+  text-transform: uppercase; margin-top: 16px;
+}
+
+.screen-media { display: flex; flex-direction: column; gap: 16px; }
+
+.media-cap {
+  font-size: .76rem; color: var(--text-3); text-align: center;
+  letter-spacing: .04em; line-height: 1.45;
+}
+
+/* ─────────── a11y + omissions ─────────── */
+
+.specs {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+  border-radius: 3px; overflow: hidden; margin-top: 28px;
+}
+
+.spec { background: var(--ground); padding: 20px 21px 22px; }
+.spec dt { font-size: .78rem; color: var(--accent-2); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
+.spec dd { margin: 0; font-size: .94rem; color: var(--text-2); line-height: 1.5; }
+.spec dd b { color: var(--text); font-weight: 500; }
+
+.omit { list-style: none; padding: 0; margin: 28px 0 0; display: flex; flex-direction: column; gap: 15px; }
+.omit li { position: relative; padding-left: 29px; color: var(--text-2); max-width: 62ch; }
+.omit li::before { content: ""; position: absolute; left: 0; top: .78em; width: 15px; height: 1px; background: var(--accent-2); }
+.omit b { color: var(--text); font-weight: 500; }
+
+/* сцена: центрира съдържанието на екрана, без да смачква закачените долу елементи */
+.stage { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; }
+
+footer {
+  margin-top: 82px; padding-top: 26px; border-top: 1px solid var(--rule);
+  font-size: .85rem; color: var(--text-3); max-width: 64ch; line-height: 1.6;
+}
+
+footer p { margin: 0 0 12px; }
+
+@media (max-width: 860px) {
+  .screen { grid-template-columns: 1fr; gap: 34px; }
+  .phone { margin: 0 auto; }
+}
+
+@media (max-width: 480px) {
+  body { padding: 0 18px 72px; }
+  .phone { width: 100%; max-width: 300px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">Дизайн на приложението</p>
+  <h1>Екрани, направени за човек, който не може да чете</h1>
+  <p class="standfirst">По време на паник атака зрението се стеснява, ръцете треперят и вниманието не задържа изречение. Всяко решение тук произлиза от това ограничение, а не от естетика.</p>
+</header>
+
+<!-- ══════════ ПАЛИТРА ══════════ -->
+<section>
+  <h2>Палитра</h2>
+  <p class="sec-intro">Светло по подразбиране, по три причини, които нямат нищо общо с вкуса.</p>
+  <p class="sec-intro" style="margin-bottom:16px"><b style="color:var(--text);font-weight:500">Разширените зеници са симптом на самата паник атака.</b> Светъл текст на тъмен фон при разширени зеници се размазва — тъмната тема става най-нечетима точно в състоянието, за което приложението съществува.</p>
+  <p class="sec-intro" style="margin-bottom:16px"><b style="color:var(--text);font-weight:500">Повечето епизоди не се случват нощем.</b> Случват се на паркинга пред магазина, в метрото, на работа. Тъмен екран на дневна светлина се чете по-трудно, не по-лесно.</p>
+  <p class="sec-intro"><b style="color:var(--text);font-weight:500">Дереализацията е чест симптом</b> — усещането, че светът е нереален и далечен. Тъмен и атмосферен интерфейс се навежда към това усещане. Обикновеният, светъл, делничен интерфейс го бута обратно. Заземяването означава връщане в нормалния свят, а нормалният свят е светъл.</p>
+  <div class="swatches">
+    <div class="sw">
+      <div class="sw-chip" style="background:#E9EFE7"></div>
+      <div class="sw-meta">
+        <span class="sw-name">Въздух</span><span class="sw-hex">#E9EFE7</span>
+        <p class="sw-why">Бяло, което е било навън. Зеленото едва се усеща — окото фокусира зеленото с най-малко усилие.</p>
+      </div>
+    </div>
+    <div class="sw">
+      <div class="sw-chip" style="background:#FCFDFB;border-bottom:1px solid #CAD7C7"></div>
+      <div class="sw-meta">
+        <span class="sw-name">Хартия</span><span class="sw-hex">#FCFDFB</span>
+        <p class="sw-why">Единственото ниво над фона. Плоско, без сенки и градиенти — нищо не бива да изглежда, че левитира.</p>
+      </div>
+    </div>
+    <div class="sw">
+      <div class="sw-chip" style="background:#17241C"></div>
+      <div class="sw-meta">
+        <span class="sw-name">Бор</span><span class="sw-hex">#17241C</span>
+        <p class="sw-why">Текст. Тъмно зелено, не черно. Важността се предава със светлота, не с втори цвят.</p>
+      </div>
+    </div>
+    <div class="sw">
+      <div class="sw-chip" style="background:#1F7342"></div>
+      <div class="sw-meta">
+        <span class="sw-name">Живо</span><span class="sw-hex">#1F7342</span>
+        <p class="sw-why">Дишането и помощта. Единственото наситено нещо на екрана.</p>
+      </div>
+    </div>
+  </div>
+  <p class="sec-intro" style="margin-top:26px;margin-bottom:16px"><b style="color:var(--text);font-weight:500">Наситеността маркира живото.</b> Цялата палитра е един тон зелено с различна светлота — фонът и текстът са почти обезцветени, а наситеността е запазена само за кривата на дишането и за помощта. Затова окото намира движещото се, без да го търси, и затова палитрата не изглежда като спа.</p>
+  <p class="sec-intro" style="margin-bottom:0"><b style="color:var(--text);font-weight:500">Червено няма никъде.</b> Индустрията рисува паник бутоните червени, защото изглеждат спешни на екранна снимка — но човек в паника няма нужда екранът да му потвърждава, че става нещо страшно.</p>
+</section>
+
+<!-- ══════════ ТИПОГРАФИЯ ══════════ -->
+<section>
+  <h2>Типография</h2>
+  <p class="sec-intro">Две гарнитури, и двете с пълна кирилица. Literata е книжна и топла — обратното на клиничен интерфейс; ползва се само за думите, които човек чете в криза. Onest носи всичко останало.</p>
+
+  <div class="type-specimen">
+    <p class="spec-line">Издишай бавно</p>
+    <p class="spec-meta">Literata Light · заглавия и думите във фокус · цифрите са табличани, за да не подскачат при отброяване</p>
+  </div>
+
+  <div class="type-specimen">
+    <p class="spec-line sans">Дневник · настройки · протокол</p>
+    <p class="spec-meta">Onest Light/Regular · интерфейс, списъци, данни</p>
+  </div>
+</section>
+
+<!-- ══════════ ЕКРАНИ ══════════ -->
+<section>
+  <h2>Екраните</h2>
+  <p class="sec-intro">Седем екрана. Приложението няма повече.</p>
+
+  <!-- 1 -->
+  <div class="screen">
+    <div class="screen-media">
+      <div class="phone">
+        <div class="island"></div>
+        <div class="statusbar"><span>14:26</span><span>34%</span></div>
+        <div class="canvas">
+          <p class="lock-time">14:26</p>
+          <p class="lock-date">вторник, 12 ноември</p>
+          <div class="lock-widget">
+            <svg width="34" height="20" viewBox="0 0 34 20" aria-hidden="true">
+              <path d="M1 17 C 5 17, 6 3, 11 3 L 14 3 C 21 3, 22 17, 33 17"
+                    fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <span class="lw-label">Дишай<span class="lw-sub">Minava · без отключване</span></span>
+          </div>
+        </div>
+        <div class="homebar"></div>
+      </div>
+      <p class="media-cap">Заключен екран · паркингът пред магазина, 14:26</p>
+    </div>
+    <div class="screen-notes">
+      <p class="screen-step">Екран 1 · Влизане</p>
+      <h3>Моментът, който решава всичко</h3>
+      <p>Ако тук се изисква отключване, продукт няма. Целият останал дизайн обслужва това едно докосване.</p>
+      <ul class="decisions">
+        <li><b>Джаджата не пита нищо.</b> Една дума и кривата на дишането. Без поздрав, без „как се чувстваш днес“.</li>
+        <li><b>Работи без отключване и без интернет.</b> Паник атака в метрото без сигнал е базов случай, не краен.</li>
+        <li><b>Зеленото е единственото наситено нещо на екрана.</b> Окото го намира, без да го търси.</li>
+        <li><b>Същият вход има и на бутона за действие, в контролния център и през Siri.</b> Различни хора посягат към различни места.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="screen">
+    <div class="screen-media">
+      <div class="phone">
+        <div class="island"></div>
+        <div class="canvas">
+          <div class="stage">
+            <p class="phase-word">Издишай</p>
+            <p class="phase-secs" style="margin-top:10px">5</p>
+            <svg class="mini-trace" viewBox="0 0 260 66" preserveAspectRatio="none" style="margin-top:34px" aria-hidden="true">
+              <path class="mt-bed"  d="M2 58 C 21 58, 21 8, 40 8 L 77 8 C 114 8, 114 58, 151 58 L 258 58"/>
+              <path class="mt-live" d="M2 58 C 21 58, 21 8, 40 8 L 77 8 C 100 8, 105 30, 118 42"/>
+              <circle class="mt-glow" cx="118" cy="42" r="11"/>
+              <circle class="mt-dot"  cx="118" cy="42" r="4"/>
+            </svg>
+          </div>
+          <p class="helpline">Помощ</p>
+        </div>
+        <div class="homebar"></div>
+      </div>
+      <p class="media-cap">Паник режим · екранът не е основният интерфейс</p>
+    </div>
+    <div class="screen-notes">
+      <p class="screen-step">Екран 2 · Ядрото</p>
+      <h3>Една дума, едно число, една крива</h3>
+      <p>Истинският интерфейс е вибрацията и гласът — екранът работи и при затворени очи. Това, което се вижда, е за човек с тунелно зрение и без очила.</p>
+      <ul class="decisions">
+        <li><b>Кривата показва колко още остава.</b> Дишащият кръг, който всяко подобно приложение ползва, не носи тази информация. Човек в паника има нужда да знае кога свършва.</li>
+        <li><b>Асиметрията се вижда.</b> Издишването заема половината от кривата, защото трае най-дълго — това е механизмът, а не украса.</li>
+        <li><b>Няма бутон „назад“ и няма навигация.</b> От този екран не се излиза случайно.</li>
+        <li><b>Няма въвеждане на текст.</b> Нито тук, нито където и да е по време на епизод.</li>
+        <li><b>„Помощ“ стои долу през цялото време.</b> Тихо, но никога скрито.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="screen">
+    <div class="screen-media">
+      <div class="phone">
+        <div class="island"></div>
+        <div class="canvas">
+          <div class="stage">
+            <p class="screen-step" style="color:var(--text-3);margin-bottom:22px">Стъпка 2 от 5</p>
+            <p class="phase-word" style="font-size:2.1rem;line-height:1.2">Намери четири<br>неща, които<br>можеш да чуеш.</p>
+            <p class="app-sub" style="margin-top:22px;margin-bottom:0">Няма нужда да ги казваш на глас. Само ги забележи.</p>
+          </div>
+          <div>
+            <div class="bigchoice" style="justify-content:center;border-color:var(--accent-2);color:var(--accent)">Продължи</div>
+            <p class="helpline" style="margin-top:8px">Помощ</p>
+          </div>
+        </div>
+        <div class="homebar"></div>
+      </div>
+      <p class="media-cap">Заземяване · текстът е примерен</p>
+    </div>
+    <div class="screen-notes">
+      <p class="screen-step">Екран 3 · Заземяване</p>
+      <h3>Внимание навън, вместо навътре</h3>
+      <p>След като дишането се успокои, вниманието се насочва към сетивата. Гласът чете същото, което пише на екрана.</p>
+      <ul class="decisions">
+        <li><b>Не се иска отговор.</b> Никакво отмятане, никакво писане, никакъв списък за избор — само забелязване.</li>
+        <li><b>Бутонът е през цялата ширина и е висок 64pt.</b> Ръцете треперят; малка цел означава провал.</li>
+        <li><b>„Стъпка 2 от 5“ показва край.</b> Затвореният край е част от успокоението.</li>
+        <li><b>Точните формулировки чакат клиничен преглед.</b> Текстът тук е запълващ — „ти си в безопасност“ и „това ще отмине“ не са едно и също нещо за човек в паника.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="screen">
+    <div class="screen-media">
+      <div class="phone">
+        <div class="island"></div>
+        <div class="canvas">
+          <div class="stage">
+            <p class="phase-word">Мина.</p>
+            <p class="app-sub" style="margin-top:14px">Продължи 6 минути. Ако ти се иска, отбележи какво го предизвика — става за петнайсет секунди.</p>
+            <p style="font-size:.78rem;color:var(--text-3);letter-spacing:.1em;text-transform:uppercase;margin:26px 0 8px">Колко силно беше</p>
+            <div class="scale-row">
+              <span class="scale-dot">1</span><span class="scale-dot">2</span>
+              <span class="scale-dot on">3</span><span class="scale-dot">4</span>
+              <span class="scale-dot">5</span>
+            </div>
+          </div>
+          <div>
+            <div class="bigchoice" style="justify-content:center;border-color:var(--accent-2);color:var(--accent)">Запиши</div>
+            <p class="helpline" style="margin-top:2px">Не сега</p>
+          </div>
+        </div>
+        <div class="homebar"></div>
+      </div>
+      <p class="media-cap">След епизода · винаги пропускаемо</p>
+    </div>
+    <div class="screen-notes">
+      <p class="screen-step">Екран 4 · След това</p>
+      <h3>Предлага се, не се изисква</h3>
+      <p>Дневникът е ценен за прогреса, но никога не застава между човека и края на епизода.</p>
+      <ul class="decisions">
+        <li><b>Появява се едва след като епизодът приключи.</b> Никога по време.</li>
+        <li><b>„Не сега“ е истинска опция, не сива уловка.</b> Пропускането не води до напомняне.</li>
+        <li><b>Скалата е с докосване, не с плъзгач.</b> Плъзгач с трепереща ръка е неизползваем.</li>
+        <li><b>„Мина.“</b> Една дума, в минало време. Това е информацията, от която човек има нужда в този момент.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="screen">
+    <div class="screen-media">
+      <div class="phone">
+        <div class="island"></div>
+        <div class="statusbar"><span>14:31</span><span>33%</span></div>
+        <div class="canvas">
+          <p class="app-h">Ако ти трябва<br>човек сега</p>
+          <p class="app-sub">Едно докосване набира. Работи без интернет.</p>
+          <div class="calltile is-first">
+            <span class="ct-num">112</span><span class="ct-name">Спешни повиквания</span>
+          </div>
+          <div class="calltile">
+            <span class="ct-num">0800 11 977</span><span class="ct-name">Национална линия за подкрепа · 24/7</span>
+          </div>
+          <div class="calltile">
+            <span class="ct-num">0800 20 202</span><span class="ct-name">Спешна психотерапевтична помощ</span>
+          </div>
+          <div class="calltile">
+            <span class="ct-num">02 492 30 30</span><span class="ct-name">Телефон на доверието, БЧК</span>
+          </div>
+        </div>
+        <div class="homebar"></div>
+      </div>
+      <p class="media-cap">Кризисни ресурси · достъпно от всеки екран</p>
+    </div>
+    <div class="screen-notes">
+      <p class="screen-step">Екран 5 · Помощ</p>
+      <h3>Единственият екран, който няма право да сгреши</h3>
+      <p>Достъпен от всяко място в приложението, винаги на едно докосване, винаги офлайн.</p>
+      <ul class="decisions">
+        <li><b>Номерът е по-едър от името на линията.</b> Търси се номер, не организация.</li>
+        <li><b>Плочките са високи 64pt и се набират с едно докосване.</b> Без екран за потвърждение.</li>
+        <li><b>Зелената рамка маркира първия избор</b> — не със спешност, а с посока.</li>
+        <li><b>Всеки номер се проверява лично преди пускане и веднъж годишно.</b> Грешен кризисен номер е по-лош от липсващ.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="screen">
+    <div class="screen-media">
+      <div class="phone">
+        <div class="island"></div>
+        <div class="statusbar"><span>9:41</span><span>82%</span></div>
+        <div class="canvas">
+          <p class="app-h">Добре ли си?</p>
+          <p class="app-sub">Ако не си — бутонът долу е винаги там.</p>
+          <div class="trend">
+            <div class="trend-big">2 <span style="font-size:1rem;color:var(--text-3)">този месец</span></div>
+            <p class="trend-label">Преди три месеца бяха осем.</p>
+          </div>
+          <p style="font-size:.78rem;color:var(--text-3);letter-spacing:.1em;text-transform:uppercase;margin:0 0 4px">Последните епизоди</p>
+          <div class="entry-log">
+            <div class="log-row"><span class="log-when">12 ноември, 14:26</span><span class="log-len">6 мин · 3</span></div>
+            <div class="log-row"><span class="log-when">4 ноември, 18:40</span><span class="log-len">11 мин · 4</span></div>
+            <div class="log-row"><span class="log-when">28 октомври, 7:05</span><span class="log-len">9 мин · 4</span></div>
+          </div>
+          <div style="margin-top:auto">
+            <div class="bigchoice" style="justify-content:center;border-color:var(--accent-2);color:var(--accent);margin-bottom:2px">Дишай</div>
+          </div>
+        </div>
+        <div class="homebar"></div>
+      </div>
+      <p class="media-cap">Начален екран · между епизодите</p>
+    </div>
+    <div class="screen-notes">
+      <p class="screen-step">Екран 6 · Спокойно състояние</p>
+      <h3>Показва спад, не постижения</h3>
+      <p>Единственото число, което заслужава да е едро, е колко по-рядко се случва.</p>
+      <ul class="decisions">
+        <li><b>Няма серии, значки и проценти на завършване.</b> Пропуснат ден при тревожен човек е вреда, не мотивация.</li>
+        <li><b>Няма известия.</b> Приложение за паника, което ти пише, е приложение, което ти напомня за паниката.</li>
+        <li><b>Спадът се изписва с думи.</b> „Преди три месеца бяха осем“ е по-разбираемо от графика.</li>
+        <li><b>Ако числото се качи, тонът не се променя.</b> Никакво разочарование от страна на интерфейса.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 7 -->
+  <div class="screen">
+    <div class="screen-media">
+      <div class="watch">
+        <div class="watch-canvas">
+          <p class="watch-phase">Издишай</p>
+          <p class="watch-secs">5</p>
+          <svg width="118" height="30" viewBox="0 0 118 30" style="margin-top:14px" aria-hidden="true">
+            <path d="M2 26 C 11 26, 11 4, 20 4 L 36 4 C 53 4, 53 26, 70 26 L 116 26"
+                  fill="none" stroke="var(--rule)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M2 26 C 11 26, 11 4, 20 4 L 36 4 C 46 4, 48 14, 54 20"
+                  fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="54" cy="20" r="3.4" fill="var(--accent)"/>
+          </svg>
+          <p class="watch-note">Само вибрация</p>
+        </div>
+      </div>
+      <p class="media-cap">Apple Watch · режим без екран и без звук</p>
+    </div>
+    <div class="screen-notes">
+      <p class="screen-step">Екран 7 · Часовник</p>
+      <h3>Функцията, която върши работа сред хора</h3>
+      <p>Самостоятелно приложение, не огледало на телефона. В режим само с вибрация екранът остава изгасен и ритъмът се предава през китката.</p>
+      <ul class="decisions">
+        <li><b>Никой отсреща не разбира, че се случва нещо.</b> Това е разликата между да го ползваш на среща и да не го ползваш.</li>
+        <li><b>Вибрацията носи ритъма сама.</b> Кратък импулс за вдишване, дълъг гаснещ за издишване.</li>
+        <li><b>Работи, когато телефонът е в чантата.</b> Часовникът не зависи от него.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ ДОСТЪПНОСТ ══════════ -->
+<section>
+  <h2>Твърди изисквания</h2>
+  <p class="sec-intro">Това не са пожелания за по-късно. Ако някое от тях не е изпълнено, екранът не е готов.</p>
+  <dl class="specs">
+    <div class="spec"><dt>Цели за докосване</dt><dd>Минимум <b>60pt</b>, в долната трета на екрана, достижими с една ръка.</dd></div>
+    <div class="spec"><dt>Без поглед</dt><dd>Всяко упражнение се изкарва докрай <b>само по вибрация и глас</b>, при изгаснал екран.</dd></div>
+    <div class="spec"><dt>Текст</dt><dd>Dynamic Type до най-едрия размер, без отрязване. Основната дума в паник режим не пада под <b>40pt</b>.</dd></div>
+    <div class="spec"><dt>Движение</dt><dd>При включено ограничаване на движението кривата спира и остава четима. Никакви пулсации.</dd></div>
+    <div class="spec"><dt>Пряка слънчева светлина</dt><dd>Паник режимът се чете <b>навън по обед</b>. Това е основният случай, не изключението.</dd></div>
+    <div class="spec"><dt>Тема</dt><dd>Следва системната настройка. <b>Без превключвател</b> в приложението — никой не търси настройка по време на атака.</dd></div>
+    <div class="spec"><dt>Офлайн</dt><dd>Целият паник режим работи в самолетен режим. Тества се при всеки цикъл.</dd></div>
+    <div class="spec"><dt>Батерия</dt><dd>Работи при <b>под 5%</b> и в режим на ниска консумация.</dd></div>
+    <div class="spec"><dt>VoiceOver</dt><dd>Пълно озвучаване, с ред на четене, който започва от фазата на дишане.</dd></div>
+    <div class="spec"><dt>Беззвучен режим</dt><dd>Вибрацията работи и при включен беззвучен режим и при заключен екран.</dd></div>
+  </dl>
+</section>
+
+<!-- ══════════ ЛИПСВА ══════════ -->
+<section>
+  <h2>Какво съзнателно липсва</h2>
+  <ul class="omit">
+    <li><b>Онбординг.</b> Приложението се сваля от човек, който вече знае какъв е проблемът му. Първото отваряне води директно към дишането.</li>
+    <li><b>Профил и акаунт.</b> Приложението не знае кой си и няма къде да го запише.</li>
+    <li><b>Известия.</b> Нито едно, от какъвто и да е вид.</li>
+    <li><b>Серии, значки, нива.</b> Успехът тук е да отваряш приложението по-рядко.</li>
+    <li><b>Чатбот.</b> Разговор с изкуствен интелект в криза е риск, който този проект не поема.</li>
+    <li><b>Общност и споделяне.</b> Модерацията на хора в криза е отделен продукт с отделен екип.</li>
+    <li><b>Превключвател за тема.</b> Приложението следва системната настройка и нищо повече. Който има нощен режим, го получава автоматично; който няма, не бива да търси настройка в 3 сутринта.</li>
+  </ul>
+</section>
+
+<footer>
+  <p>Всички клинични формулировки, продължителности и последователности в тези екрани са запълващи и подлежат на писмено одобрение от психолог преди пускане. Дизайнът определя механизма; съдържанието идва от прегледа.</p>
+  <p>Кризисните телефонни номера подлежат на лична проверка преди пускане и веднъж годишно след това.</p>
+</footer>
+
+</div>
