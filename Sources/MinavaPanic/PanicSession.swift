@@ -40,18 +40,32 @@ public final class PanicSession {
     public private(set) var currentIndex: Int?
     public private(set) var isFinished: Bool = false
 
+    /// Which protocol and which version produced these seconds. Worth carrying so that a
+    /// question later — what exactly did this person receive — has an answer.
+    public let protocolID: String
+    public let protocolVersion: Int
+
+    /// The exercise is running unapproved values in a development build. The interface must
+    /// mark it unmistakably; a release build cannot reach this state at all.
+    public var isProvisional: Bool
+
     private let haptics: HapticPort
     private let voice: VoicePort?
     private let onEvent: (SessionEvent) -> Void
 
+    /// Takes an `ExecutablePlan`, never a raw one. The gate is passed before a session can
+    /// exist, so there is no path here that skips it.
     public init(
-        plan: BreathingPlan,
+        plan: ExecutablePlan,
         tempo: Double = 1,
         haptics: HapticPort,
         voice: VoicePort? = nil,
         onEvent: @escaping (SessionEvent) -> Void
     ) {
-        self.steps = Timeline.steps(for: plan, tempo: tempo)
+        self.steps = plan.timeline(tempo: tempo)
+        self.protocolID = plan.protocolID
+        self.protocolVersion = plan.version
+        self.isProvisional = plan.isProvisional
         self.haptics = haptics
         self.voice = voice
         self.onEvent = onEvent
