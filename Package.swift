@@ -19,7 +19,8 @@ let package = Package(
     products: [
         .library(name: "MinavaCore", targets: ["MinavaCore"]),
         .library(name: "MinavaPanic", targets: ["MinavaPanic"]),
-        .library(name: "MinavaSync", targets: ["MinavaSync"])
+        .library(name: "MinavaSync", targets: ["MinavaSync"]),
+        .library(name: "MinavaHaptics", targets: ["MinavaHaptics"])
     ],
     targets: [
         // Чиста логика. Без интерфейс, без мрежа, без хранилище, без часовник.
@@ -30,6 +31,10 @@ let package = Package(
         .target(name: "MinavaPanic", dependencies: ["MinavaCore"]),
 
         // Единственият модул, който има право да докосва iCloud.
-        .target(name: "MinavaSync", dependencies: ["MinavaCore"])
+        .target(name: "MinavaSync", dependencies: ["MinavaCore"]),
+
+        // Единственото място в пакета, което внася CoreHaptics и WatchKit.
+        // Реализира HapticPort; логиката на епизода не знае за него.
+        .target(name: "MinavaHaptics", dependencies: ["MinavaCore", "MinavaPanic"])
     ]
 )
