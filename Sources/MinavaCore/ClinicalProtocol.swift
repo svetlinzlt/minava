@@ -37,6 +37,11 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
         guard status == .approved, let approval else { return false }
         return approval.appliesToVersion == version
     }
+
+    /// Reads one protocol file. Kept here so every caller decodes it the same way.
+    public static func decoded(from data: Data) throws -> ClinicalProtocol {
+        try JSONDecoder().decode(ClinicalProtocol.self, from: data)
+    }
 }
 
 public struct Approval: Codable, Equatable, Sendable {
@@ -78,28 +83,56 @@ public struct BreathingPlan: Codable, Equatable, Sendable {
         public let type: Kind
         public let duration: TimeInterval
         public let hapticIntensity: HapticIntensity?
+
+        public init(type: Kind, duration: TimeInterval, hapticIntensity: HapticIntensity?) {
+            self.type = type
+            self.duration = duration
+            self.hapticIntensity = hapticIntensity
+        }
     }
 
     public struct Entry: Codable, Equatable, Sendable {
         public let duration: TimeInterval
+
+        public init(duration: TimeInterval) {
+            self.duration = duration
+        }
     }
 
     public struct Cycle: Codable, Equatable, Sendable {
         public let phases: [Phase]
+
+        public init(phases: [Phase]) {
+            self.phases = phases
+        }
     }
 
     public struct Repeat: Codable, Equatable, Sendable {
         public let cycles: Int
         public let firstCycleFactor: Double?
+
+        public init(cycles: Int, firstCycleFactor: Double? = nil) {
+            self.cycles = cycles
+            self.firstCycleFactor = firstCycleFactor
+        }
     }
 
     public struct Exit: Codable, Equatable, Sendable {
         public let duration: TimeInterval
+
+        public init(duration: TimeInterval) {
+            self.duration = duration
+        }
     }
 
     public struct UserTempo: Codable, Equatable, Sendable {
         public let min: Double
         public let max: Double
+
+        public init(min: Double, max: Double) {
+            self.min = min
+            self.max = max
+        }
     }
 
     public let entry: Entry
@@ -107,4 +140,21 @@ public struct BreathingPlan: Codable, Equatable, Sendable {
     public let `repeat`: Repeat
     public let exit: Exit
     public let userTempo: UserTempo?
+
+    // Публичен конструктор, защото тези типове се създават и извън модула — в
+    // тестовете и в приложенията. Публична структура без публичен конструктор се
+    // прави само чрез декодиране, което е дефект, а не решение.
+    public init(
+        entry: Entry,
+        cycle: Cycle,
+        repeat: Repeat,
+        exit: Exit,
+        userTempo: UserTempo? = nil
+    ) {
+        self.entry = entry
+        self.cycle = cycle
+        self.repeat = `repeat`
+        self.exit = exit
+        self.userTempo = userTempo
+    }
 }

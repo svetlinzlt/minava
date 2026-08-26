@@ -1,0 +1,48 @@
+name: Проверки
+
+# Задача 3.7. Валидацията на клиничните файлове е част от билда, а не нещо, което
+# някой трябва да помни да пусне. Дотогава, докато няма Mac под ръка, това е и
+# единственото място, където пакетът наистина се компилира.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tools:
+    name: Клинични файлове, офлайн, модули
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Клиничните файлове отговарят на схемата
+        run: python tools/validate_clinical.py
+
+      - name: Нищо неодобрено не се пуска
+        run: python tools/validate_clinical.py --release
+
+      - name: Няма мрежа там, където ѝ е забранено
+        run: python tools/check_offline.py
+
+      - name: Посоката между модулите е спазена
+        run: python tools/check_modules.py
+
+  swift:
+    name: Пакетът се строи и тестовете минават
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Версия на Swift
+        run: swift --version
+
+      - name: Билд
+        run: swift build
+
+      - name: Тестове
+        run: swift test

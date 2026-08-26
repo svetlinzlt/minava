@@ -1,5 +1,7 @@
 # Minava
 
+[![Проверки](https://github.com/svetlinzlt/minava/actions/workflows/checks.yml/badge.svg)](https://github.com/svetlinzlt/minava/actions/workflows/checks.yml)
+
 **Minava е безплатно приложение за iPhone и Apple Watch, което помага на човек да
 премине през паник атака и с времето да има по-малко атаки.**
 
