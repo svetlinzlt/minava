@@ -41,6 +41,9 @@ jobs:
       - name: Няма терапевтични твърдения в текста към потребителя
         run: python tools/check_wording.py
 
+      - name: Кризисните номера са в срок
+        run: python tools/check_lines.py
+
   swift:
     name: Пакетът се строи и тестовете минават
     runs-on: macos-latest

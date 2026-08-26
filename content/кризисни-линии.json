@@ -1,0 +1,57 @@
+{
+  "note": "Кризисните линии, които приложението показва. Номерата са пренесени от docs/landing.html и са събрани от публични източници. НИТО ЕДИН не е проверен лично. Проверката е задача 1.3 и се повтаря веднъж годишно (задача 9.1). Пази се от tools/check_lines.py.",
+  "verificationValidDays": 365,
+  "country": "BG",
+  "lines": [
+    {
+      "id": "emergency-112",
+      "name": "Спешни повиквания",
+      "number": "112",
+      "hours": "денонощно",
+      "languages": ["bg", "en"],
+      "verifiedOn": null,
+      "verifiedBy": null,
+      "notes": "Единният европейски номер. Проверява се като всички останали."
+    },
+    {
+      "id": "national-support",
+      "name": "Национална линия за подкрепа",
+      "number": "0800 11 977",
+      "hours": "денонощно — за проверка",
+      "languages": ["bg"],
+      "verifiedOn": null,
+      "verifiedBy": null,
+      "notes": "Работното време е от публичен източник, не е потвърдено по телефона."
+    },
+    {
+      "id": "emergency-psychotherapy",
+      "name": "Спешна психотерапевтична помощ",
+      "number": "0800 20 202",
+      "hours": "за проверка",
+      "languages": ["bg"],
+      "verifiedOn": null,
+      "verifiedBy": null,
+      "notes": null
+    },
+    {
+      "id": "red-cross-trust",
+      "name": "Телефон на доверието, БЧК",
+      "number": "02 492 30 30",
+      "hours": "за проверка",
+      "languages": ["bg"],
+      "verifiedOn": null,
+      "verifiedBy": null,
+      "notes": "Градски номер — цената на разговора се проверява и се казва в приложението, ако не е безплатен."
+    },
+    {
+      "id": "children-116111",
+      "name": "Национална линия за деца",
+      "number": "116 111",
+      "hours": "за проверка",
+      "languages": ["bg"],
+      "verifiedOn": null,
+      "verifiedBy": null,
+      "notes": "Показва се, но приложението не е насочено към деца. Решението дали остава е част от 1.3."
+    }
+  ]
+}
