@@ -1,0 +1,110 @@
+import Foundation
+
+/// A clinical protocol file, as stored in `clinical/`.
+///
+/// The shape mirrors `clinical/schema/protocol.schema.json` exactly. The schema is the
+/// contract; these types are one reader of it. Task 3.7 adds a test that the two agree,
+/// so that a change to one cannot quietly diverge from the other.
+///
+/// Nothing here decides what is clinically correct. The values arrive as data and are
+/// approved in writing, per version, by a qualified professional.
+public struct ClinicalProtocol: Codable, Equatable, Sendable {
+    public enum Kind: String, Codable, Sendable {
+        case breathing, grounding, exposure, screening, crisisPath = "crisis-path"
+    }
+
+    public enum Status: String, Codable, Sendable {
+        case draft, review, approved
+    }
+
+    public let schemaVersion: Int
+    public let id: String
+    public let version: Int
+    public let kind: Kind
+    public let status: Status
+    public let approval: Approval?
+    public let title: LocalizedText
+    public let excludedBy: String?
+    public let breathing: BreathingPlan?
+    public let steps: [GroundingStep]?
+    public let notes: String?
+
+    /// Whether a release build is allowed to execute this protocol.
+    ///
+    /// Approval is granted to one version of one file. Change a value, raise the version,
+    /// and the old approval stops applying — which is the entire point of it.
+    public var isExecutableInRelease: Bool {
+        guard status == .approved, let approval else { return false }
+        return approval.appliesToVersion == version
+    }
+}
+
+public struct Approval: Codable, Equatable, Sendable {
+    public struct Person: Codable, Equatable, Sendable {
+        public let name: String
+        public let credentials: String
+        public let registration: String?
+    }
+
+    public let approvedBy: Person
+    public let approvedAt: String
+    public let appliesToVersion: Int
+    public let scope: String
+    public let reviewDue: String?
+}
+
+public struct LocalizedText: Codable, Equatable, Sendable {
+    public let bg: String
+    public let en: String?
+}
+
+public struct GroundingStep: Codable, Equatable, Sendable {
+    public let text: LocalizedText
+    public let minDuration: Double?
+}
+
+/// The breathing exercise: an entry, a repeated cycle, and an exit that is never abrupt.
+public struct BreathingPlan: Codable, Equatable, Sendable {
+    public struct Phase: Codable, Equatable, Sendable {
+        public enum Kind: String, Codable, Sendable, CaseIterable {
+            /// Fixed order. A cycle may omit either hold, never reorder.
+            case inhale, holdIn, exhale, holdOut
+        }
+
+        public enum HapticIntensity: String, Codable, Sendable {
+            case rising, falling, steady
+        }
+
+        public let type: Kind
+        public let duration: TimeInterval
+        public let hapticIntensity: HapticIntensity?
+    }
+
+    public struct Entry: Codable, Equatable, Sendable {
+        public let duration: TimeInterval
+    }
+
+    public struct Cycle: Codable, Equatable, Sendable {
+        public let phases: [Phase]
+    }
+
+    public struct Repeat: Codable, Equatable, Sendable {
+        public let cycles: Int
+        public let firstCycleFactor: Double?
+    }
+
+    public struct Exit: Codable, Equatable, Sendable {
+        public let duration: TimeInterval
+    }
+
+    public struct UserTempo: Codable, Equatable, Sendable {
+        public let min: Double
+        public let max: Double
+    }
+
+    public let entry: Entry
+    public let cycle: Cycle
+    public let `repeat`: Repeat
+    public let exit: Exit
+    public let userTempo: UserTempo?
+}
