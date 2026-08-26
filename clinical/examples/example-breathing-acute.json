@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "example-breathing-acute",
+  "version": 1,
+  "kind": "breathing",
+  "status": "draft",
+  "approval": null,
+  "title": {
+    "bg": "ПРИМЕР — не е протокол",
+    "en": "EXAMPLE — not a protocol"
+  },
+  "excludedBy": "example-screening",
+  "breathing": {
+    "entry": { "duration": 0.6 },
+    "cycle": {
+      "phases": [
+        { "type": "inhale", "duration": 4, "hapticIntensity": "rising" },
+        { "type": "holdIn", "duration": 2, "hapticIntensity": "steady" },
+        { "type": "exhale", "duration": 6, "hapticIntensity": "falling" }
+      ]
+    },
+    "repeat": { "cycles": 5 },
+    "exit": { "duration": 4 }
+  },
+  "notes": "Filler values with no clinical standing. They exist so the schema, the validator and the mockups have something to run on, and they are the same numbers used in docs/СЦЕНАРИЙ.md. They must never be read as guidance and never reach a release build. Real values come from task 6.1."
+}
