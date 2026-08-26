@@ -1,0 +1,13 @@
+{
+  "note": "Секунди от докосването до първото водено вдишване. Методът е в docs/ИЗМЕРВАНЕ.md, бюджетите идват от docs/ВХОДОВЕ.md. Проверява се от tools/check_timings.py.",
+  "ceilingColdStart": 5.0,
+  "budgets": {
+    "lock-screen-widget": 2.0,
+    "action-button": 2.0,
+    "watch-complication": 2.0,
+    "control-center": 3.0,
+    "siri": 4.0,
+    "home-screen": 5.0
+  },
+  "measurements": []
+}
