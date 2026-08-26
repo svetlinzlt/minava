@@ -42,6 +42,32 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
     public static func decoded(from data: Data) throws -> ClinicalProtocol {
         try JSONDecoder().decode(ClinicalProtocol.self, from: data)
     }
+
+    public init(
+        schemaVersion: Int = 1,
+        id: String,
+        version: Int,
+        kind: Kind,
+        status: Status,
+        approval: Approval?,
+        title: LocalizedText,
+        excludedBy: String? = nil,
+        breathing: BreathingPlan? = nil,
+        steps: [GroundingStep]? = nil,
+        notes: String? = nil
+    ) {
+        self.schemaVersion = schemaVersion
+        self.id = id
+        self.version = version
+        self.kind = kind
+        self.status = status
+        self.approval = approval
+        self.title = title
+        self.excludedBy = excludedBy
+        self.breathing = breathing
+        self.steps = steps
+        self.notes = notes
+    }
 }
 
 public struct Approval: Codable, Equatable, Sendable {
@@ -49,6 +75,12 @@ public struct Approval: Codable, Equatable, Sendable {
         public let name: String
         public let credentials: String
         public let registration: String?
+
+        public init(name: String, credentials: String, registration: String? = nil) {
+            self.name = name
+            self.credentials = credentials
+            self.registration = registration
+        }
     }
 
     public let approvedBy: Person
@@ -56,16 +88,40 @@ public struct Approval: Codable, Equatable, Sendable {
     public let appliesToVersion: Int
     public let scope: String
     public let reviewDue: String?
+
+    public init(
+        approvedBy: Person,
+        approvedAt: String,
+        appliesToVersion: Int,
+        scope: String,
+        reviewDue: String? = nil
+    ) {
+        self.approvedBy = approvedBy
+        self.approvedAt = approvedAt
+        self.appliesToVersion = appliesToVersion
+        self.scope = scope
+        self.reviewDue = reviewDue
+    }
 }
 
 public struct LocalizedText: Codable, Equatable, Sendable {
     public let bg: String
     public let en: String?
+
+    public init(bg: String, en: String? = nil) {
+        self.bg = bg
+        self.en = en
+    }
 }
 
 public struct GroundingStep: Codable, Equatable, Sendable {
     public let text: LocalizedText
     public let minDuration: Double?
+
+    public init(text: LocalizedText, minDuration: Double? = nil) {
+        self.text = text
+        self.minDuration = minDuration
+    }
 }
 
 /// The breathing exercise: an entry, a repeated cycle, and an exit that is never abrupt.

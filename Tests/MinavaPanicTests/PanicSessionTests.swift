@@ -3,7 +3,7 @@ import MinavaCore
 @testable import MinavaPanic
 
 /// Records what the session asked for, so the tests can check intent without a device.
-private final class SpyHaptics: HapticPort, @unchecked Sendable {
+final class SpyHaptics: HapticPort, @unchecked Sendable {
     private(set) var phases: [BreathingPlan.Phase.Kind] = []
     private(set) var stopCount = 0
 
@@ -18,7 +18,7 @@ private final class SpyHaptics: HapticPort, @unchecked Sendable {
     func stop() { stopCount += 1 }
 }
 
-private final class SpyVoice: VoicePort, @unchecked Sendable {
+final class SpyVoice: VoicePort, @unchecked Sendable {
     let isEnabled = true
     private(set) var stopCount = 0
     func speak(_ text: String) {}
@@ -27,16 +27,25 @@ private final class SpyVoice: VoicePort, @unchecked Sendable {
 
 final class PanicSessionTests: XCTestCase {
 
-    private func plan(cycles: Int = 2) -> BreathingPlan {
-        BreathingPlan(
-            entry: .init(duration: 0.6),
-            cycle: .init(phases: [
-                .init(type: .inhale, duration: 4, hapticIntensity: .rising),
-                .init(type: .exhale, duration: 6, hapticIntensity: .falling)
-            ]),
-            repeat: .init(cycles: cycles, firstCycleFactor: nil),
-            exit: .init(duration: 4),
-            userTempo: nil)
+    /// A session cannot be built from raw values — only from a plan that has passed the
+    /// gate. In a development build an unapproved protocol is allowed through and marked.
+    private func plan(cycles: Int = 2) -> ExecutablePlan {
+        let file = ClinicalProtocol(
+            id: "test-breathing",
+            version: 1,
+            kind: .breathing,
+            status: .draft,
+            approval: nil,
+            title: LocalizedText(bg: "Тест"),
+            breathing: BreathingPlan(
+                entry: .init(duration: 0.6),
+                cycle: .init(phases: [
+                    .init(type: .inhale, duration: 4, hapticIntensity: .rising),
+                    .init(type: .exhale, duration: 6, hapticIntensity: .falling)
+                ]),
+                repeat: .init(cycles: cycles),
+                exit: .init(duration: 4)))
+        return try! ExecutablePlan(file, build: .debug)
     }
 
     func testStartingEmitsStartedAndTheFirstStep() {
@@ -126,5 +135,16 @@ final class PanicSessionTests: XCTestCase {
         let session = PanicSession(plan: plan(cycles: 3), haptics: SpyHaptics()) { _ in }
         // 0.6 + 10 × 3 + 4
         XCTAssertEqual(session.duration, 34.6, accuracy: 0.000_001)
+    }
+}
+
+extension PanicSessionTests {
+
+    /// A development build carries the mark; the interface must show it.
+    func testSessionKnowsItIsRunningUnapprovedValues() {
+        let session = PanicSession(plan: plan(), haptics: SpyHaptics()) { _ in }
+        XCTAssertTrue(session.isProvisional)
+        XCTAssertEqual(session.protocolID, "test-breathing")
+        XCTAssertEqual(session.protocolVersion, 1)
     }
 }
