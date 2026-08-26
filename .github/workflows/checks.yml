@@ -35,6 +35,9 @@ jobs:
       - name: Секундите до първо вдишване са в бюджета
         run: python tools/check_timings.py
 
+      - name: Няма изискване без източник
+        run: python tools/check_requirements.py
+
   swift:
     name: Пакетът се строи и тестовете минават
     runs-on: macos-latest

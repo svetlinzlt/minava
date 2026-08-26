@@ -119,6 +119,7 @@ Signed-off-by: Име Фамилия <имейл@пример.bg>
 - [ ] Няма ново събиране на данни, дори анонимно
 - [ ] `python tools/check_offline.py` минава
 - [ ] `python tools/check_modules.py` минава
+- [ ] `python tools/check_requirements.py` минава
 - [ ] `python tools/validate_clinical.py` минава
 - [ ] Работи в самолетен режим — [протоколът е тук](docs/ОФЛАЙН.md)
 - [ ] Целите за докосване по пътя на паник режима са ≥ 60pt
