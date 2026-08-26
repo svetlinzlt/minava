@@ -58,7 +58,8 @@ final class TimelineTests: XCTestCase {
     func testHoldPhaseCanBeOmitted() {
         let steps = Timeline.steps(for: Fixtures.plan(holdIn: nil, cycles: 1))
         XCTAssertFalse(steps.contains { $0.kind == .phase(.holdIn) })
-        XCTAssertEqual(steps.count, 3)
+        // Влизане, вдишване, издишване, излизане.
+        XCTAssertEqual(steps.count, 4)
     }
 
     func testHapticShapeTravelsWithTheStep() {
