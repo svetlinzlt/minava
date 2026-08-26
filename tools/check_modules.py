@@ -24,10 +24,13 @@ ALLOWED = {
     "MinavaCore": {"Foundation"},
     "MinavaPanic": {"Foundation", "MinavaCore"},
     "MinavaSync": {"Foundation", "MinavaCore", "CloudKit", "SwiftData"},
+    # Единственият модул с достъп до хардуерната хаптика. Границата, която пази
+    # ядрото, е между MinavaPanic и него — не между пакета и приложението.
+    "MinavaHaptics": {"Foundation", "MinavaCore", "MinavaPanic", "CoreHaptics", "WatchKit"},
 }
 
-# Не влизат в нито един модул под Sources/. Интерфейсът и устройството са на
-# приложенията; модулите общуват с тях през протоколи.
+# Не влизат в модул, който не ги е поискал изрично в ALLOWED. Интерфейсът и
+# устройството са на приложенията; модулите общуват с тях през протоколи.
 BELONGS_TO_APPS = {
     "SwiftUI", "UIKit", "AppKit", "WatchKit", "WidgetKit", "ActivityKit",
     "CoreHaptics", "AVFoundation", "AVFAudio", "UserNotifications",
@@ -76,6 +79,8 @@ def check_imports(errors):
                         continue
                     imported = match.group(1)
                     where = "%s:%d" % (rel, index + 1)
+                    if imported in ALLOWED[module]:
+                        continue
                     if imported in BELONGS_TO_APPS:
                         errors.append("%s: import %s — интерфейсът и устройството са на "
                                       "приложенията, не на модулите" % (where, imported))
