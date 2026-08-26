@@ -35,6 +35,10 @@ let package = Package(
 
         // Единственото място в пакета, което внася CoreHaptics и WatchKit.
         // Реализира HapticPort; логиката на епизода не знае за него.
-        .target(name: "MinavaHaptics", dependencies: ["MinavaCore", "MinavaPanic"])
+        .target(name: "MinavaHaptics", dependencies: ["MinavaCore", "MinavaPanic"]),
+
+        // Тестовете четат истинските файлове в clinical/, а не техни копия.
+        .testTarget(name: "MinavaCoreTests", dependencies: ["MinavaCore"]),
+        .testTarget(name: "MinavaPanicTests", dependencies: ["MinavaPanic", "MinavaCore"])
     ]
 )

@@ -37,6 +37,11 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
         guard status == .approved, let approval else { return false }
         return approval.appliesToVersion == version
     }
+
+    /// Reads one protocol file. Kept here so every caller decodes it the same way.
+    public static func decoded(from data: Data) throws -> ClinicalProtocol {
+        try JSONDecoder().decode(ClinicalProtocol.self, from: data)
+    }
 }
 
 public struct Approval: Codable, Equatable, Sendable {
