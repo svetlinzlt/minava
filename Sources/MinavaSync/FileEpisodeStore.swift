@@ -130,4 +130,37 @@ public struct EpisodeExport: Codable, Equatable, Sendable {
         decoder.dateDecodingStrategy = .iso8601
         return try decoder.decode(EpisodeExport.self, from: data)
     }
+
+    /// The same records as plain text, one episode per line.
+    ///
+    /// JSON is correct and a program reads it, but a person who wants to show their journal
+    /// to a professional opens an unreadable file. This is the version that can be printed,
+    /// or read aloud in a room.
+    ///
+    /// Trigger labels are resolved through the catalogue so the file says "тълпа" rather
+    /// than "crowd"; an unknown identifier falls back to itself instead of disappearing.
+    public func plainText(catalogue: TriggerCatalogue = TriggerCatalogue(triggers: [])) -> String {
+        let day = DateFormatter()
+        day.locale = Locale(identifier: "en_US_POSIX")
+        day.dateFormat = "yyyy-MM-dd HH:mm"
+
+        var labels: [String: String] = [:]
+        for trigger in catalogue.triggers { labels[trigger.id] = trigger.bg }
+
+        var lines = ["Дневник на епизодите · Minava",
+                     "Изнесено на " + day.string(from: exportedAt),
+                     "Записи: \(episodes.count)",
+                     ""]
+
+        for episode in episodes.sorted(by: { $0.startedAt > $1.startedAt }) {
+            var parts = [day.string(from: episode.startedAt), "сила \(episode.intensity)"]
+            if !episode.triggers.isEmpty {
+                parts.append(episode.triggers.map { labels[$0] ?? $0 }.joined(separator: ", "))
+            }
+            lines.append(parts.joined(separator: " · "))
+        }
+
+        if episodes.isEmpty { lines.append("(няма записи)") }
+        return lines.joined(separator: "\n") + "\n"
+    }
 }

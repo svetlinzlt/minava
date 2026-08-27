@@ -166,3 +166,70 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(try store.all().map(\.intensity), [2])
     }
 }
+
+extension SettingsTests {
+
+    // MARK: - Износ, четим и от човек
+
+    private func catalogue() -> TriggerCatalogue {
+        TriggerCatalogue(triggers: [
+            .init(id: "crowd", bg: "тълпа", en: "crowd"),
+            .init(id: "work", bg: "работа", en: "work")
+        ])
+    }
+
+    func testTextExportIsReadableAndNamesTheTriggersInBulgarian() throws {
+        let store = makeStore()
+        let journal = Journal(store: store, catalogue: catalogue())
+        try journal.record(intensity: 4, triggers: ["crowd", "work"],
+                           startedAt: Date(timeIntervalSince1970: 1_772_000_000))
+
+        let text = try SettingsService(store: store,
+                                       preferences: InMemoryPreferences(),
+                                       catalogue: catalogue()).exportText()
+
+        XCTAssertTrue(text.contains("Дневник на епизодите"))
+        XCTAssertTrue(text.contains("сила 4"))
+        XCTAssertTrue(text.contains("тълпа, работа"), "етикетите се превеждат: \(text)")
+        XCTAssertFalse(text.contains("crowd"), "идентификаторите не се показват на човек")
+    }
+
+    /// Непознат етикет остава като идентификатор, вместо да изчезне безшумно.
+    func testAnUnknownTriggerSurvivesTheExport() throws {
+        let store = makeStore()
+        try Journal(store: store).record(intensity: 2, triggers: ["нещо-ново"])
+        let text = try SettingsService(store: store,
+                                       preferences: InMemoryPreferences()).exportText()
+        XCTAssertTrue(text.contains("нещо-ново"))
+    }
+
+    func testTextExportOfAnEmptyJournalSaysSo() throws {
+        let text = try SettingsService(store: makeStore(),
+                                       preferences: InMemoryPreferences()).exportText()
+        XCTAssertTrue(text.contains("(няма записи)"))
+        XCTAssertTrue(text.contains("Записи: 0"))
+    }
+
+    func testTextExportIsNewestFirst() throws {
+        let store = makeStore()
+        let journal = Journal(store: store)
+        let old = Date(timeIntervalSince1970: 1_700_000_000)
+        try journal.record(intensity: 1, startedAt: old)
+        try journal.record(intensity: 5, startedAt: old.addingTimeInterval(86_400))
+
+        let text = try SettingsService(store: store,
+                                       preferences: InMemoryPreferences()).exportText()
+        let five = try XCTUnwrap(text.range(of: "сила 5"))
+        let one = try XCTUnwrap(text.range(of: "сила 1"))
+        XCTAssertTrue(five.lowerBound < one.lowerBound)
+    }
+
+    func testBothFileNamesCarryTheDate() {
+        let settings = SettingsService(store: makeStore(), preferences: InMemoryPreferences())
+        var parts = DateComponents()
+        parts.year = 2026; parts.month = 9; parts.day = 4
+        let day = Calendar(identifier: .gregorian).date(from: parts)!
+        XCTAssertEqual(settings.exportFileName(now: day), "minava-2026-09-04.json")
+        XCTAssertEqual(settings.exportTextFileName(now: day), "minava-2026-09-04.txt")
+    }
+}
