@@ -129,3 +129,30 @@ final class CrisisLinesTests: XCTestCase {
             .appendingPathComponent("content/кризисни-линии.json")
     }
 }
+
+extension CrisisLinesTests {
+
+    // MARK: - Цената на разговора
+
+    func testCostHasThreeHonestStates() {
+        XCTAssertEqual(CrisisLine(id: "a", name: "a", number: "112", hours: "",
+                                  languages: [], isFreeCall: true).callCost, .free)
+        XCTAssertEqual(CrisisLine(id: "b", name: "b", number: "02 1", hours: "",
+                                  languages: [], isFreeCall: false).callCost, .charged)
+        XCTAssertEqual(CrisisLine(id: "c", name: "c", number: "0800 1", hours: "",
+                                  languages: []).callCost, .unknown,
+                       "липсващо поле значи непроверено, не безплатно")
+    }
+
+    func testTheEmergencyNumberIsFree() {
+        XCTAssertEqual(CrisisDirectory.emergency.callCost, .free)
+    }
+
+    /// Градският номер в регистъра е платен и това трябва да се вижда.
+    func testTheRegistryCarriesCostForEveryLine() {
+        let directory = CrisisDirectory.load(from: registryURL())
+        XCTAssertFalse(directory.lines.isEmpty)
+        XCTAssertTrue(directory.lines.contains { $0.callCost == .charged },
+                      "поне един номер е градски и трябва да е отбелязан като платен")
+    }
+}

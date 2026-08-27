@@ -112,6 +112,20 @@
     background: transparent; border: none;
   }
 
+  /* Изходът от дишането. Появява се чак след първия пълен цикъл и стои горе вляво —
+     най-трудната за палеца точка на екрана. Така човек, който е решил да спре, може;
+     човек, който трепери, не излиза по невнимание. Решава противоречието между
+     дизайна („няма бутон назад") и изискване И-07 („видим път назад"). */
+  #leave {
+    position: absolute; top: 0; left: 0;
+    min-height: 60px; min-width: 96px;
+    display: none; align-items: center;
+    padding: 0 0 0 1.25rem;
+    font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--quiet); background: none; border: none; width: auto;
+  }
+  #leave.on { display: flex; }
+
   /* --- Екран 1 · дишането ---
      Мерките идват от app-design.html: думата е по-малка от числото, двете са
      ляво подравнени в центрирана сцена, а кривата стои непосредствено под тях —
@@ -191,7 +205,10 @@
   .line .name { font-size: 1rem; }
   .line .hours { display: block; color: var(--quiet); font-size: 0.85rem; margin-top: 0.15rem; }
   .line .num { font-size: 1.25rem; color: var(--alive); white-space: nowrap;
-               font-variant-numeric: tabular-nums; }
+               font-variant-numeric: tabular-nums; text-align: right; }
+  /* Цената се вижда ПРЕДИ набирането. Празно поле не значи безплатно. */
+  .line .cost { display: block; font-size: 0.75rem; color: var(--quiet);
+                letter-spacing: 0; margin-top: 0.15rem; }
   .warn { color: var(--quiet); font-size: 0.85rem; line-height: 1.5; margin: 1rem 0; }
 
   /* --- Екран 6 · за прототипа --- */
@@ -220,6 +237,7 @@
 
 <!-- ЕКРАН 1 · дишането -->
 <section class="screen" id="breathe">
+  <button id="leave" data-go="after">Стига</button>
   <div class="stage">
     <p class="word" id="word">Вдишай</p>
     <p class="count" id="count">4</p>
@@ -237,6 +255,7 @@
 <section class="screen" id="pause">
   <div class="ask" id="ask">Мина ли най-силното?</div>
   <div class="actions">
+    <button id="again" class="quiet">Още веднъж</button>
     <button data-go="ground">Продължи</button>
     <button class="quiet" data-go="after">Стига</button>
   </div>
@@ -269,19 +288,19 @@
   <h2>Ако ти е нужен човек сега</h2>
   <a class="line" href="tel:112">
     <span class="name">Спешни повиквания<span class="hours">денонощно</span></span>
-    <span class="num">112</span></a>
+    <span class="num">112<span class="cost">безплатно</span></span></a>
   <a class="line" href="tel:080011977">
     <span class="name">Национална линия за подкрепа<span class="hours">за проверка</span></span>
-    <span class="num">0800 11 977</span></a>
+    <span class="num">0800 11 977<span class="cost">безплатно · непроверено</span></span></a>
   <a class="line" href="tel:080020202">
     <span class="name">Спешна психотерапевтична помощ<span class="hours">за проверка</span></span>
-    <span class="num">0800 20 202</span></a>
+    <span class="num">0800 20 202<span class="cost">безплатно · непроверено</span></span></a>
   <a class="line" href="tel:024923030">
     <span class="name">Телефон на доверието, БЧК<span class="hours">за проверка</span></span>
-    <span class="num">02 492 30 30</span></a>
+    <span class="num">02 492 30 30<span class="cost">по тарифа — не е безплатен</span></span></a>
   <a class="line" href="tel:116111">
     <span class="name">Национална линия за деца<span class="hours">за проверка</span></span>
-    <span class="num">116 111</span></a>
+    <span class="num">116 111<span class="cost">цената не е проверена</span></span></a>
   <p class="warn"><strong>Внимание:</strong> нито един от тези номера не е проверен лично.
      Събрани са от публични източници. В истинското приложение непроверен номер не се
      показва.</p>
@@ -294,8 +313,17 @@
   <p>Служи да се провери как изглежда и как звучи приложението — на слънце, с една ръка, с
      твоя размер на буквите. Изхвърля се, когато свърши работа.</p>
 
-  <div class="row"><span>Глас</span>
+  <div class="row" id="voicerow"><span>Глас</span>
     <button class="quiet" id="voicebtn" style="width:auto;min-width:120px">изключен</button></div>
+  <p class="muted" id="novoice" style="display:none">На това устройство няма български глас,
+     затова гласът не се предлага. Приложението не иска от теб да инсталираш нищо —
+     вибрацията и текстът носят упражнението.</p>
+  <div class="row"><span>Числото за отброяване</span>
+    <button class="quiet" id="countbtn" style="width:auto;min-width:120px">показано</button></div>
+  <p class="muted">Числото е <strong>превключвател за проба, не настройка в приложението</strong>.
+     За повечето хора то е опора; за част от хората броенето е самото натрапливо поведение.
+     Решава се едно за всички след TestFlight, а не с настройка, която човек в паника да
+     избира.</p>
   <div class="row"><span>Последно измерване</span><span id="measured" class="muted">—</span></div>
 
   <p class="muted"><strong>Какво не може да се провери тук.</strong> Вибрация — Safari на iOS
@@ -337,6 +365,7 @@
   var el = function (id) { return document.getElementById(id); };
   var screens = ["enter", "breathe", "pause", "ground", "after", "crisis", "about"];
   var voiceOn = false;
+  var SHOW_COUNT = true;
   var tapAt = 0, firstCueAt = 0;
   var ticker = 0, startedAt = 0, lastPhase = -1, groundStep = 0;
 
@@ -400,12 +429,34 @@
 
   var CURVELEN = 0;
 
+  // Български глас може да липсва на устройството. Тогава гласът просто не се
+  // предлага — без съобщение за грешка и без подкана да инсталираш нещо. Текстът и
+  // вибрацията носят упражнението и без това.
+  function bulgarianVoice() {
+    if (!window.speechSynthesis || !window.speechSynthesis.getVoices) { return null; }
+    var voices = window.speechSynthesis.getVoices() || [];
+    for (var i = 0; i < voices.length; i++) {
+      if ((voices[i].lang || "").toLowerCase().indexOf("bg") === 0) { return voices[i]; }
+    }
+    return null;
+  }
+
+  function refreshVoiceRow() {
+    var available = !!bulgarianVoice();
+    el("voicerow").style.display = available ? "" : "none";
+    el("novoice").style.display = available ? "none" : "";
+    if (!available) { voiceOn = false; }
+  }
+
   function speak(text) {
     if (!voiceOn || !window.speechSynthesis) { return; }
     try {
       window.speechSynthesis.cancel();
       var u = new SpeechSynthesisUtterance(text);
-      u.lang = "bg-BG";
+      var voice = bulgarianVoice();
+      if (!voice) { return; }
+      u.voice = voice;
+      u.lang = voice.lang;
       u.rate = 0.85;
       window.speechSynthesis.speak(u);
     } catch (e) { /* мълчаливо — грешка по време на епизод не помага на никого */ }
@@ -453,8 +504,14 @@
     }
 
     if (step.kind === "phase") {
-      el("count").textContent = Math.ceil(step.start + step.dur - elapsed);
+      el("count").textContent = SHOW_COUNT
+        ? Math.ceil(step.start + step.dur - elapsed)
+        : "";
     }
+
+    // Изходът се появява чак след първия пълен цикъл.
+    var cycleLen = CYCLE.reduce(function (sum, p) { return sum + p.dur; }, 0);
+    el("leave").classList.toggle("on", elapsed >= ENTRY + cycleLen);
 
     // Рисуването е последно и е обградено: ако геометрията се спъне, броенето
     // продължава. Графична грешка не бива да спре упражнение по средата.
@@ -474,6 +531,7 @@
   }
 
   function start() {
+    el("leave").classList.remove("on");
     tapAt = performance.now();
     firstCueAt = 0;
     lastPhase = -1;
@@ -506,9 +564,24 @@
     tick();
   });
 
-  // При връщане към приложението състоянието се пресмята наново от часовника.
+  // Прекъсване — обаждане, сменено приложение, заспал екран. При връщане не
+  // продължаваме от секундата, на която сме спрели: човек се озовава по средата на
+  // издишване, което не се получава. Връщаме се в началото на текущия цикъл. Губят
+  // се няколко секунди и това е по-меко от двете други възможности.
+  function rewindToCycleStart() {
+    var cycleLen = CYCLE.reduce(function (sum, p) { return sum + p.dur; }, 0);
+    var elapsed = (performance.now() - startedAt) / 1000;
+    if (elapsed <= ENTRY || cycleLen <= 0) { return; }
+    var into = elapsed - ENTRY;
+    var cycleStart = ENTRY + Math.floor(into / cycleLen) * cycleLen;
+    startedAt = performance.now() - cycleStart * 1000;
+    lastPhase = -1;
+  }
+
   document.addEventListener("visibilitychange", function () {
-    if (!document.hidden && ticker) { tick(); }
+    if (document.hidden || !ticker) { return; }
+    rewindToCycleStart();
+    tick();
   });
 
   Array.prototype.forEach.call(document.querySelectorAll("[data-go]"), function (b) {
@@ -530,6 +603,13 @@
     el("gnext").textContent = (groundStep === GROUNDING.length - 1) ? "Готово" : "Продължи";
   }
 
+  // 🟡 Формулировката чака психолог: „още веднъж" близо до тревожен човек може да
+  // прозвучи като „не се справи". Механизмът е готов; думите не са одобрени.
+  el("again").addEventListener("click", function () {
+    stopEverything();
+    start();
+  });
+
   el("gnext").addEventListener("click", function () {
     if (groundStep < GROUNDING.length - 1) {
       groundStep += 1;
@@ -544,11 +624,23 @@
     b.addEventListener("click", function () { show("about"); });
   });
 
+  el("countbtn").addEventListener("click", function () {
+    SHOW_COUNT = !SHOW_COUNT;
+    el("countbtn").textContent = SHOW_COUNT ? "показано" : "скрито";
+    if (!SHOW_COUNT) { el("count").textContent = ""; }
+  });
+
   el("voicebtn").addEventListener("click", function () {
     voiceOn = !voiceOn;
     el("voicebtn").textContent = voiceOn ? "включен" : "изключен";
     if (voiceOn) { speak("Готово"); }
   });
+
+  refreshVoiceRow();
+  if (window.speechSynthesis) {
+    // Списъкът с гласове често се попълва по-късно.
+    window.speechSynthesis.onvoiceschanged = refreshVoiceRow;
+  }
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(function () {});

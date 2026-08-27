@@ -30,7 +30,8 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "content", "кризисни-линии.json")
 
-REQUIRED = ["id", "name", "number", "hours", "languages", "verifiedOn", "verifiedBy"]
+REQUIRED = ["id", "name", "number", "hours", "languages", "verifiedOn", "verifiedBy",
+            "isFreeCall"]
 NUMBER = re.compile(r"^[0-9 ]{3,20}$")
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
@@ -66,6 +67,13 @@ def main():
         number = line.get("number")
         if not isinstance(number, str) or not NUMBER.match(number):
             errors.append("%s: %r не изглежда като телефонен номер" % (name, number))
+
+        cost = line.get("isFreeCall", False)
+        if cost is not None and not isinstance(cost, bool):
+            errors.append("%s: isFreeCall трябва да е true, false или null" % name)
+        elif cost is None:
+            message = "%s: не се знае дали разговорът е безплатен" % name
+            (errors if release else notes).append(message)
 
         verified_on = line.get("verifiedOn")
         if verified_on is None:

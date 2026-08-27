@@ -50,10 +50,16 @@ public final class InMemoryPreferences: PreferencesStoring, @unchecked Sendable 
 public struct SettingsService: Sendable {
     private let store: EpisodeStoring
     private let preferences: PreferencesStoring
+    private let catalogue: TriggerCatalogue
 
-    public init(store: EpisodeStoring, preferences: PreferencesStoring) {
+    public init(
+        store: EpisodeStoring,
+        preferences: PreferencesStoring,
+        catalogue: TriggerCatalogue = TriggerCatalogue(triggers: [])
+    ) {
         self.store = store
         self.preferences = preferences
+        self.catalogue = catalogue
     }
 
     public var current: Preferences { preferences.load() }
@@ -80,6 +86,11 @@ public struct SettingsService: Sendable {
         try store.export()
     }
 
+    /// The readable version, for taking to a professional.
+    public func exportText() throws -> String {
+        try EpisodeExport(episodes: store.all()).plainText(catalogue: catalogue)
+    }
+
     /// A name with a date in it, so a file in someone's downloads folder still makes sense
     /// in a year.
     public func exportFileName(now: Date = Date()) -> String {
@@ -87,6 +98,13 @@ public struct SettingsService: Sendable {
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "yyyy-MM-dd"
         return "minava-\(formatter.string(from: now)).json"
+    }
+
+    public func exportTextFileName(now: Date = Date()) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return "minava-\(formatter.string(from: now)).txt"
     }
 
     // MARK: - Изтриване

@@ -13,6 +13,9 @@ public struct CrisisLine: Codable, Equatable, Sendable, Identifiable {
     public let languages: [String]
     public let verifiedOn: String?
     public let verifiedBy: String?
+    /// `nil` means nobody has checked — never assume it is free. A person without
+    /// credit has to know the cost *before* dialling, not after.
+    public let isFreeCall: Bool?
     public let notes: String?
 
     public init(
@@ -23,6 +26,7 @@ public struct CrisisLine: Codable, Equatable, Sendable, Identifiable {
         languages: [String],
         verifiedOn: String? = nil,
         verifiedBy: String? = nil,
+        isFreeCall: Bool? = nil,
         notes: String? = nil
     ) {
         self.id = id
@@ -32,7 +36,25 @@ public struct CrisisLine: Codable, Equatable, Sendable, Identifiable {
         self.languages = languages
         self.verifiedOn = verifiedOn
         self.verifiedBy = verifiedBy
+        self.isFreeCall = isFreeCall
         self.notes = notes
+    }
+
+    /// What the screen says about the cost, in three honest states.
+    public enum CallCost: Equatable, Sendable {
+        case free
+        case charged
+        /// Nobody checked. The screen says so rather than staying silent, because
+        /// silence reads as "free".
+        case unknown
+    }
+
+    public var callCost: CallCost {
+        switch isFreeCall {
+        case .some(true): return .free
+        case .some(false): return .charged
+        case .none: return .unknown
+        }
     }
 
     /// What a single tap opens. Spaces are for reading, not for dialling.
@@ -64,7 +86,8 @@ public struct CrisisDirectory: Sendable {
         name: "Спешни повиквания",
         number: "112",
         hours: "денонощно",
-        languages: ["bg", "en"])
+        languages: ["bg", "en"],
+        isFreeCall: true)
 
     public let lines: [CrisisLine]
     public let validDays: Int
