@@ -5,7 +5,8 @@
     "docs/landing.html",
     "content/app-store.md",
     "content/дисклеймъри.md",
-    "content/поверителност.md"
+    "content/поверителност.md",
+    "content/спусъци.json"
   ],
   "groups": [
     {

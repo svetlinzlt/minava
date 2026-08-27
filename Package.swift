@@ -39,6 +39,7 @@ let package = Package(
 
         // Тестовете четат истинските файлове в clinical/, а не техни копия.
         .testTarget(name: "MinavaCoreTests", dependencies: ["MinavaCore"]),
-        .testTarget(name: "MinavaPanicTests", dependencies: ["MinavaPanic", "MinavaCore"])
+        .testTarget(name: "MinavaPanicTests", dependencies: ["MinavaPanic", "MinavaCore"]),
+        .testTarget(name: "MinavaSyncTests", dependencies: ["MinavaSync", "MinavaCore"])
     ]
 )
