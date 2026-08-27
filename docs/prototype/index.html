@@ -84,12 +84,16 @@
   button.plain { background: transparent; color: var(--quiet); border-color: transparent; }
   button:active { opacity: 0.85; }
 
+  /* Дребен и тих, както в дизайна — но целта за докосване остава 60pt.
+     Малкият надпис не бива да значи малка цел. */
   .help {
     flex: none;
     margin-top: 0.75rem;
     text-align: center;
-    font-size: 1.05rem;
-    color: var(--alive);
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--quiet);
     background: none; border: none;
     min-height: 60px;
   }
@@ -108,25 +112,40 @@
     background: transparent; border: none;
   }
 
-  /* --- Екран 1 · дишането --- */
-  #breathe { justify-content: space-between; }
-  .phase { flex: 1 1 auto; display: flex; flex-direction: column;
-           justify-content: center; align-items: center; min-height: 0; }
-  .phase .word {
-    font-family: ui-serif, Georgia, serif;
-    font-size: clamp(2.6rem, 15vw, 4.5rem);
-    line-height: 1.05;
-    margin: 0;
+  /* --- Екран 1 · дишането ---
+     Мерките идват от app-design.html: думата е по-малка от числото, двете са
+     ляво подравнени в центрирана сцена, а кривата стои непосредствено под тях —
+     не долепена за долния край на екрана. */
+  #breathe { justify-content: flex-end; }
+  .stage {
+    flex: 1 1 auto; min-height: 0;
+    display: flex; flex-direction: column; justify-content: center;
   }
-  .phase .count {
-    font-variant-numeric: tabular-nums;
-    font-size: clamp(3.5rem, 26vw, 7rem);
+  .stage .word {
+    font-family: ui-serif, Georgia, "Times New Roman", serif;
+    font-weight: 300;
+    /* Долната граница е 3.4rem = 54.4px ≈ 41pt: изискване И-41 е основната
+       дума в паник режим да не пада под 40pt. */
+    font-size: clamp(3.4rem, 16vw, 4.2rem);
+    letter-spacing: -0.02em;
     line-height: 1;
-    color: var(--alive);
-    margin-top: 0.4rem;
+    margin: 0;
+    color: var(--pine);
   }
-  .curvewrap { flex: none; padding: 0.5rem 0 1rem; }
-  svg { display: block; width: 100%; height: 88px; }
+  .stage .count {
+    font-weight: 300;
+    font-variant-numeric: tabular-nums;
+    font-size: clamp(4.4rem, 21vw, 5.6rem);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin: 0.6rem 0 0;
+    color: var(--alive);
+  }
+  #curve { display: block; width: 100%; height: 78px; margin-top: 2.1rem; }
+  .bed  { fill: none; stroke: var(--line);  stroke-width: 2; stroke-linecap: round; }
+  .live { fill: none; stroke: var(--alive); stroke-width: 2; stroke-linecap: round; }
+  .dot  { fill: var(--alive); }
+  .glow { fill: var(--alive); opacity: 0.18; }
 
   /* --- Екран 2 · паузата --- */
   #pause { justify-content: flex-end; }
@@ -184,10 +203,8 @@
          min-height: 64px; border-top: 1px solid var(--line); }
   .row:last-of-type { border-bottom: 1px solid var(--line); }
 
-  @media (prefers-reduced-motion: reduce) {
-    /* Кривата спира и остава четима. */
-    #playhead { transition: none !important; }
-  }
+  /* Ограничаването на движението се спазва в кода, не със стил: точката спира да
+     пълзи и се мести само при смяна на фаза. Информацията остава, движението — не. */
 </style>
 </head>
 <body>
@@ -203,16 +220,14 @@
 
 <!-- ЕКРАН 1 · дишането -->
 <section class="screen" id="breathe">
-  <div class="phase">
+  <div class="stage">
     <p class="word" id="word">Вдишай</p>
-    <div class="count" id="count">4</div>
-  </div>
-  <div class="curvewrap">
-    <svg id="curve" viewBox="0 0 340 88" preserveAspectRatio="none" aria-hidden="true">
-      <path id="path" fill="none" stroke="var(--line)" stroke-width="2"/>
-      <path id="pathdone" fill="none" stroke="var(--alive)" stroke-width="3"
-            stroke-linecap="round"/>
-      <circle id="playhead" cx="0" cy="44" r="5" fill="var(--alive)"/>
+    <p class="count" id="count">4</p>
+    <svg id="curve" viewBox="0 0 340 78" preserveAspectRatio="none" aria-hidden="true">
+      <path id="path" class="bed"/>
+      <path id="pathdone" class="live"/>
+      <circle id="glow" class="glow" cx="0" cy="70" r="11"/>
+      <circle id="playhead" class="dot" cx="0" cy="70" r="4"/>
     </svg>
   </div>
   <button class="help" data-go="crisis">Помощ</button>
@@ -352,22 +367,27 @@
 
   // --- кривата: цялото упражнение, за да се вижда колко остава ---
   function buildCurve() {
-    var w = 340, h = 88, mid = h / 2, amp = 30, d = "";
+    // Пропорциите са от дизайна: кривата лежи ниско и се вдига нагоре, а не е
+    // центрирана. Така издишването слиза до самото дъно и асиметрията се вижда.
+    // Ширината на viewBox следва реалната ширина на екрана, за да е мащабът 1:1.
+    // Иначе разтягането прави точката и ореола ѝ елипси на по-широк телефон.
+    var w = Math.max(el("curve").clientWidth || 0, 240), base = 70, amp = 58, d = "";
+    el("curve").setAttribute("viewBox", "0 0 " + w + " 78");
     function x(sec) { return (sec / TOTAL) * w; }
-    d += "M " + x(0) + " " + mid;
+    d += "M " + x(0) + " " + base;
     TIMELINE.forEach(function (s) {
       var x0 = x(s.start), x1 = x(s.start + s.dur);
-      if (s.kind !== "phase") { d += " L " + x1 + " " + mid; return; }
+      if (s.kind !== "phase") { d += " L " + x1 + " " + base; return; }
       if (s.phase === 0) {            // вдишване — нагоре
-        d += " C " + (x0 + (x1 - x0) * 0.4) + " " + mid +
-             ", " + (x0 + (x1 - x0) * 0.6) + " " + (mid - amp) +
-             ", " + x1 + " " + (mid - amp);
+        d += " C " + (x0 + (x1 - x0) * 0.45) + " " + base +
+             ", " + (x0 + (x1 - x0) * 0.55) + " " + (base - amp) +
+             ", " + x1 + " " + (base - amp);
       } else if (s.phase === 1) {     // задържане — равно горе
-        d += " L " + x1 + " " + (mid - amp);
+        d += " L " + x1 + " " + (base - amp);
       } else {                        // издишване — надолу, по-дълго
-        d += " C " + (x0 + (x1 - x0) * 0.4) + " " + (mid - amp) +
-             ", " + (x0 + (x1 - x0) * 0.6) + " " + (mid + amp * 0.15) +
-             ", " + x1 + " " + mid;
+        d += " C " + (x0 + (x1 - x0) * 0.45) + " " + (base - amp) +
+             ", " + (x0 + (x1 - x0) * 0.55) + " " + base +
+             ", " + x1 + " " + base;
       }
     });
     el("path").setAttribute("d", d);
@@ -395,6 +415,9 @@
     // На iOS това няма да направи нищо. Оставено, за да работи, ако някой ден стане.
     if (navigator.vibrate) { try { navigator.vibrate(ms); } catch (e) {} }
   }
+
+  var REDUCED = window.matchMedia &&
+                window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function tick() {
     // Времето се смята от часовника, а не от кадрите. Ако браузърът спре да рисува —
@@ -435,11 +458,16 @@
 
     // Рисуването е последно и е обградено: ако геометрията се спъне, броенето
     // продължава. Графична грешка не бива да спре упражнение по средата.
-    var portion = Math.min(elapsed / TOTAL, 1);
+    //
+    // При ограничено движение точката не пълзи — застива в началото на фазата и
+    // се мести чак на следващата. Кривата остава четима, движението изчезва.
+    var portion = Math.min((REDUCED ? step.start : elapsed) / TOTAL, 1);
     try {
       var head = el("path").getPointAtLength(CURVELEN * portion);
       el("playhead").setAttribute("cx", head.x);
       el("playhead").setAttribute("cy", head.y);
+      el("glow").setAttribute("cx", head.x);
+      el("glow").setAttribute("cy", head.y);
       el("pathdone").style.strokeDashoffset = CURVELEN * (1 - portion);
     } catch (e) { /* мълчаливо */ }
 
@@ -450,7 +478,7 @@
     firstCueAt = 0;
     lastPhase = -1;
     show("breathe");
-    if (!CURVELEN) { CURVELEN = buildCurve(); }
+    CURVELEN = buildCurve();
     startedAt = performance.now();
     clearInterval(ticker);
     ticker = setInterval(tick, 50);
@@ -469,6 +497,14 @@
   }
 
   el("tapzone").addEventListener("click", start);
+
+  // Смяна на ориентацията или на размера на шрифта променя ширината — кривата се
+  // построява наново, за да не се разтегне.
+  window.addEventListener("resize", function () {
+    if (!ticker) { return; }
+    CURVELEN = buildCurve();
+    tick();
+  });
 
   // При връщане към приложението състоянието се пресмята наново от часовника.
   document.addEventListener("visibilitychange", function () {
