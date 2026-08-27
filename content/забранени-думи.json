@@ -6,7 +6,8 @@
     "content/app-store.md",
     "content/дисклеймъри.md",
     "content/поверителност.md",
-    "content/спусъци.json"
+    "content/спусъци.json",
+    "content/за-специалисти.md"
   ],
   "groups": [
     {
@@ -155,6 +156,66 @@
       "pattern": "диагноз",
       "where": "content/поверителност.md",
       "reason": "същото"
+    },
+    {
+      "pattern": "медицинско изделие",
+      "where": "content/app-store.md",
+      "reason": "дисклеймърът „не е медицинско изделие“ е задължителен и в описанието"
+    },
+    {
+      "pattern": "medical device",
+      "where": "content/app-store.md",
+      "reason": "същото, англоезичната витрина"
+    },
+    {
+      "pattern": "лечение",
+      "where": "content/app-store.md",
+      "reason": "част от дисклеймъра „не замества преглед, диагноза или лечение“"
+    },
+    {
+      "pattern": "treatment",
+      "where": "content/app-store.md",
+      "reason": "същото, англоезичната витрина"
+    },
+    {
+      "pattern": "диагноз",
+      "where": "content/app-store.md",
+      "reason": "същото"
+    },
+    {
+      "pattern": "diagnos",
+      "where": "content/app-store.md",
+      "reason": "същото"
+    },
+    {
+      "pattern": "streak",
+      "where": "content/app-store.md",
+      "reason": "отрицанието „no streaks“ е част от обещанието, не твърдение"
+    },
+    {
+      "pattern": "медицинско изделие",
+      "where": "content/за-специалисти.md",
+      "reason": "страницата за специалисти е длъжна да каже изрично, че не е"
+    },
+    {
+      "pattern": "лечение",
+      "where": "content/за-специалисти.md",
+      "reason": "„не замества преглед, диагноза или лечение“ плюс разграничението от лечение"
+    },
+    {
+      "pattern": "диагноз",
+      "where": "content/за-специалисти.md",
+      "reason": "същото"
+    },
+    {
+      "pattern": "терапевт",
+      "where": "content/за-специалисти.md",
+      "reason": "адресатите са психотерапевти — назоваване на професия, не твърдение"
+    },
+    {
+      "pattern": "терапия",
+      "where": "content/за-специалисти.md",
+      "reason": "разграничението от терапия трябва да може да се напише"
     }
   ]
 }
