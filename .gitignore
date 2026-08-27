@@ -32,3 +32,6 @@ ExportOptions.plist
 # Локални тайни
 .env
 *.local
+
+# Локална конфигурация на редактора
+.claude/

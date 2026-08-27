@@ -7,7 +7,8 @@
     "content/дисклеймъри.md",
     "content/поверителност.md",
     "content/спусъци.json",
-    "content/за-специалисти.md"
+    "content/за-специалисти.md",
+    "docs/prototype/index.html"
   ],
   "groups": [
     {
@@ -216,6 +217,26 @@
       "pattern": "терапия",
       "where": "content/за-специалисти.md",
       "reason": "разграничението от терапия трябва да може да се напише"
+    },
+    {
+      "pattern": "медицинско изделие",
+      "where": "docs/prototype/index.html",
+      "reason": "прототипът носи същия дисклеймър като приложението"
+    },
+    {
+      "pattern": "лечение",
+      "where": "docs/prototype/index.html",
+      "reason": "част от дисклеймъра"
+    },
+    {
+      "pattern": "диагноз",
+      "where": "docs/prototype/index.html",
+      "reason": "същото"
+    },
+    {
+      "pattern": "терапевтич",
+      "where": "docs/prototype/index.html",
+      "reason": "името на кризисната линия „Спешна психотерапевтична помощ“"
     }
   ]
 }
