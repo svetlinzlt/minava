@@ -37,6 +37,8 @@ public struct Episode: Codable, Equatable, Sendable, Identifiable {
 public protocol EpisodeStoring: Sendable {
     func save(_ episode: Episode) throws
     func all() throws -> [Episode]
+    /// One record at a time — the right to correct is exercised without our help.
+    func delete(id: UUID) throws
     func deleteEverything() throws -> DeletionOutcome
     func export() throws -> Data
 }
