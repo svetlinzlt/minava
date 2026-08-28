@@ -5,7 +5,15 @@
   "description": "Structure of a clinical protocol file. Mechanical bounds only: this schema constrains what the engine can execute, never what is clinically correct. See docs/ДИШАНЕ.md.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "id", "version", "kind", "status", "approval", "title"],
+  "required": [
+    "schemaVersion",
+    "id",
+    "version",
+    "kind",
+    "status",
+    "approval",
+    "title"
+  ],
   "properties": {
     "schemaVersion": {
       "description": "Version of this schema the file was written against.",
@@ -24,36 +32,76 @@
     },
     "kind": {
       "type": "string",
-      "enum": ["breathing", "grounding", "exposure", "screening", "crisis-path"]
+      "enum": [
+        "breathing",
+        "grounding",
+        "exposure",
+        "screening",
+        "crisis-path"
+      ]
     },
     "status": {
       "description": "draft and review never ship. Only approved is executable in a release build.",
       "type": "string",
-      "enum": ["draft", "review", "approved"]
+      "enum": [
+        "draft",
+        "review",
+        "approved"
+      ]
     },
     "approval": {
       "description": "Null until a qualified professional has signed off in writing on this exact version.",
       "oneOf": [
-        { "type": "null" },
+        {
+          "type": "null"
+        },
         {
           "type": "object",
           "additionalProperties": false,
-          "required": ["approvedBy", "approvedAt", "appliesToVersion", "scope"],
+          "required": [
+            "approvedBy",
+            "approvedAt",
+            "appliesToVersion",
+            "scope"
+          ],
           "properties": {
             "approvedBy": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["name", "credentials"],
+              "required": [
+                "name",
+                "credentials"
+              ],
               "properties": {
-                "name": { "type": "string", "minLength": 2 },
-                "credentials": { "type": "string", "minLength": 2 },
-                "registration": { "type": "string" }
+                "name": {
+                  "type": "string",
+                  "minLength": 2
+                },
+                "credentials": {
+                  "type": "string",
+                  "minLength": 2
+                },
+                "registration": {
+                  "type": "string"
+                }
               }
             },
-            "approvedAt": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
-            "appliesToVersion": { "type": "integer", "minimum": 1 },
-            "scope": { "type": "string", "minLength": 10 },
-            "reviewDue": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+            "approvedAt": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "appliesToVersion": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "scope": {
+              "type": "string",
+              "minLength": 10
+            },
+            "reviewDue": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            }
           }
         }
       ]
@@ -61,10 +109,18 @@
     "title": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["bg"],
+      "required": [
+        "bg"
+      ],
       "properties": {
-        "bg": { "type": "string", "minLength": 2 },
-        "en": { "type": "string", "minLength": 2 }
+        "bg": {
+          "type": "string",
+          "minLength": 2
+        },
+        "en": {
+          "type": "string",
+          "minLength": 2
+        }
       }
     },
     "excludedBy": {
@@ -76,20 +132,33 @@
       "description": "Required when kind is breathing. Durations are seconds.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["entry", "cycle", "repeat", "exit"],
+      "required": [
+        "entry",
+        "cycle",
+        "repeat",
+        "exit"
+      ],
       "properties": {
         "entry": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["duration"],
+          "required": [
+            "duration"
+          ],
           "properties": {
-            "duration": { "type": "number", "minimum": 0, "maximum": 5 }
+            "duration": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 5
+            }
           }
         },
         "cycle": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["phases"],
+          "required": [
+            "phases"
+          ],
           "properties": {
             "phases": {
               "description": "Fixed order: inhale, holdIn, exhale, holdOut. Optional phases may be omitted.",
@@ -99,17 +168,42 @@
               "items": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["type", "duration"],
+                "required": [
+                  "type",
+                  "duration"
+                ],
                 "properties": {
                   "type": {
                     "type": "string",
-                    "enum": ["inhale", "holdIn", "exhale", "holdOut"]
+                    "enum": [
+                      "inhale",
+                      "holdIn",
+                      "exhale",
+                      "holdOut"
+                    ]
                   },
-                  "duration": { "type": "number", "minimum": 0.5, "maximum": 30 },
+                  "duration": {
+                    "type": "number",
+                    "minimum": 0.5,
+                    "maximum": 30
+                  },
                   "hapticIntensity": {
                     "description": "rising, falling or steady. The value itself is clinical.",
                     "type": "string",
-                    "enum": ["rising", "falling", "steady"]
+                    "enum": [
+                      "rising",
+                      "falling",
+                      "steady"
+                    ]
+                  },
+                  "depth": {
+                    "description": "How full the breath is, not how long it lasts. Separate from duration on purpose: the literature suggests that instructing someone to breathe slowly often makes them breathe deeper, which lowers CO2 — thought to be one of the mechanisms that sustains panic. Which value is right is a clinical decision (task 6.1); the engine only carries it.",
+                    "type": "string",
+                    "enum": [
+                      "shallow",
+                      "normal",
+                      "deep"
+                    ]
                   }
                 }
               }
@@ -119,28 +213,55 @@
         "repeat": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["cycles"],
+          "required": [
+            "cycles"
+          ],
           "properties": {
-            "cycles": { "type": "integer", "minimum": 1, "maximum": 60 },
-            "firstCycleFactor": { "type": "number", "minimum": 1, "maximum": 2 }
+            "cycles": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60
+            },
+            "firstCycleFactor": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 2
+            }
           }
         },
         "exit": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["duration"],
+          "required": [
+            "duration"
+          ],
           "properties": {
-            "duration": { "type": "number", "minimum": 1, "maximum": 15 }
+            "duration": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 15
+            }
           }
         },
         "userTempo": {
           "description": "Range the person may slow down or speed up within. Omit to forbid it.",
           "type": "object",
           "additionalProperties": false,
-          "required": ["min", "max"],
+          "required": [
+            "min",
+            "max"
+          ],
           "properties": {
-            "min": { "type": "number", "minimum": 0.75, "maximum": 1 },
-            "max": { "type": "number", "minimum": 1, "maximum": 1.25 }
+            "min": {
+              "type": "number",
+              "minimum": 0.75,
+              "maximum": 1
+            },
+            "max": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1.25
+            }
           }
         }
       }
@@ -153,18 +274,32 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["text"],
+        "required": [
+          "text"
+        ],
         "properties": {
           "text": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["bg"],
+            "required": [
+              "bg"
+            ],
             "properties": {
-              "bg": { "type": "string", "minLength": 2 },
-              "en": { "type": "string", "minLength": 2 }
+              "bg": {
+                "type": "string",
+                "minLength": 2
+              },
+              "en": {
+                "type": "string",
+                "minLength": 2
+              }
             }
           },
-          "minDuration": { "type": "number", "minimum": 0, "maximum": 120 }
+          "minDuration": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 120
+          }
         }
       }
     },
