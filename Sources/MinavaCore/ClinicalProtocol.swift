@@ -136,14 +136,34 @@ public struct BreathingPlan: Codable, Equatable, Sendable {
             case rising, falling, steady
         }
 
+        /// How full the breath is, separate from how long it lasts.
+        ///
+        /// The two are not the same instruction and the difference matters: telling someone
+        /// to breathe slowly often makes them breathe *deeper*, because the feeling of
+        /// suffocation invites a bigger breath. A deeper breath lowers CO₂, which is thought
+        /// to be one of the mechanisms that sustains panic — the opposite of the intent.
+        ///
+        /// Which value belongs here is a clinical decision (task 6.1). The engine only
+        /// carries it to the interface; it has no opinion.
+        public enum Depth: String, Codable, Sendable {
+            case shallow, normal, deep
+        }
+
         public let type: Kind
         public let duration: TimeInterval
         public let hapticIntensity: HapticIntensity?
+        public let depth: Depth?
 
-        public init(type: Kind, duration: TimeInterval, hapticIntensity: HapticIntensity?) {
+        public init(
+            type: Kind,
+            duration: TimeInterval,
+            hapticIntensity: HapticIntensity? = nil,
+            depth: Depth? = nil
+        ) {
             self.type = type
             self.duration = duration
             self.hapticIntensity = hapticIntensity
+            self.depth = depth
         }
     }
 

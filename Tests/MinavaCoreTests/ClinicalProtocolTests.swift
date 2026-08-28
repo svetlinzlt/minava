@@ -111,3 +111,23 @@ final class ClinicalProtocolTests: XCTestCase {
         (value as? NSNumber)?.doubleValue
     }
 }
+
+extension ClinicalProtocolTests {
+
+    /// Същият принцип като при границите: схемата е договорът, а Swift е един неин
+    /// четец. Разминат ли се стойностите за дълбочина, файл, приет от валидатора, би
+    /// бил отказан от приложението — мълчаливо.
+    func testDepthValuesMatchTheSchema() throws {
+        let schema = try Fixtures.json(at: "clinical/schema/protocol.schema.json")
+        let phase = try node(schema, "properties", "breathing", "properties",
+                             "cycle", "properties", "phases", "items", "properties")
+        let depth = try node(phase, "depth")
+        let inSchema = Set(try XCTUnwrap(depth["enum"] as? [String]))
+
+        XCTAssertEqual(inSchema, ["shallow", "normal", "deep"])
+        for value in inSchema {
+            XCTAssertNotNil(BreathingPlan.Phase.Depth(rawValue: value),
+                            "схемата допуска \(value), а Swift не го познава")
+        }
+    }
+}

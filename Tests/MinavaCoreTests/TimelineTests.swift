@@ -109,3 +109,49 @@ final class TimelineTests: XCTestCase {
         XCTAssertEqual(Timeline.step(at: inhale.end, in: steps)?.kind, .phase(.holdIn))
     }
 }
+
+extension TimelineTests {
+
+    // MARK: - Дълбочината на дишането
+
+    /// Продължителност и дълбочина са две различни инструкции. Времевата линия трябва да
+    /// носи и втората до интерфейса, иначе екранът може да каже само колко дълго.
+    func testDepthTravelsWithTheStep() {
+        let plan = BreathingPlan(
+            entry: .init(duration: 0),
+            cycle: .init(phases: [
+                .init(type: .inhale, duration: 4, hapticIntensity: .rising, depth: .shallow),
+                .init(type: .exhale, duration: 6, hapticIntensity: .falling, depth: .normal)
+            ]),
+            repeat: .init(cycles: 1),
+            exit: .init(duration: 2))
+
+        let steps = Timeline.steps(for: plan)
+        XCTAssertEqual(steps.first { $0.kind == .phase(.inhale) }?.depth, .shallow)
+        XCTAssertEqual(steps.first { $0.kind == .phase(.exhale) }?.depth, .normal)
+        XCTAssertNil(steps.last?.depth, "излизането няма дълбочина")
+    }
+
+    /// Протокол без дълбочина остава изпълним — стойността е клинична и може още да я няма.
+    func testAPlanWithoutDepthStillRuns() {
+        let steps = Timeline.steps(for: Fixtures.plan(cycles: 1))
+        XCTAssertFalse(steps.isEmpty)
+        XCTAssertNil(steps.first { $0.kind == .phase(.inhale) }?.depth)
+    }
+
+    func testDepthIsDecodedFromAFile() throws {
+        let json = """
+        { "schemaVersion": 1, "id": "depth-test", "version": 1, "kind": "breathing",
+          "status": "draft", "approval": null, "title": { "bg": "Тест" },
+          "breathing": {
+            "entry": { "duration": 0 },
+            "cycle": { "phases": [
+              { "type": "inhale", "duration": 4, "depth": "shallow" },
+              { "type": "exhale", "duration": 6, "depth": "normal" } ] },
+            "repeat": { "cycles": 1 },
+            "exit": { "duration": 2 } } }
+        """
+        let file = try ClinicalProtocol.decoded(from: Data(json.utf8))
+        XCTAssertEqual(file.breathing?.cycle.phases.first?.depth, .shallow)
+    }
+}

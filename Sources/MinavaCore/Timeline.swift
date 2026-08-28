@@ -15,6 +15,8 @@ public struct TimelineStep: Equatable, Sendable {
     /// Zero-based cycle this step belongs to; `nil` for entry and exit.
     public let cycle: Int?
     public let hapticIntensity: BreathingPlan.Phase.HapticIntensity?
+    /// Carried through so the interface can say how full the breath is, not only how long.
+    public let depth: BreathingPlan.Phase.Depth?
 
     public var end: TimeInterval { start + duration }
 
@@ -23,13 +25,15 @@ public struct TimelineStep: Equatable, Sendable {
         start: TimeInterval,
         duration: TimeInterval,
         cycle: Int?,
-        hapticIntensity: BreathingPlan.Phase.HapticIntensity?
+        hapticIntensity: BreathingPlan.Phase.HapticIntensity?,
+        depth: BreathingPlan.Phase.Depth? = nil
     ) {
         self.kind = kind
         self.start = start
         self.duration = duration
         self.cycle = cycle
         self.hapticIntensity = hapticIntensity
+        self.depth = depth
     }
 }
 
@@ -65,7 +69,8 @@ public enum Timeline {
                                           start: clock,
                                           duration: duration,
                                           cycle: index,
-                                          hapticIntensity: phase.hapticIntensity))
+                                          hapticIntensity: phase.hapticIntensity,
+                                          depth: phase.depth))
                 clock += duration
             }
         }
