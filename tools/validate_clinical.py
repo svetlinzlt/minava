@@ -126,8 +126,22 @@ def check_consistency(doc, errors, warnings):
     kind = doc.get("kind")
     if kind == "breathing" and "breathing" not in doc:
         errors.append("kind е breathing, но липсва блокът breathing")
-    if kind == "grounding" and "steps" not in doc:
-        errors.append("kind е grounding, но липсват steps")
+    if kind in ("grounding", "regulation") and not doc.get("steps"):
+        errors.append("kind е %s, но липсват steps" % kind)
+
+    # Правилото от docs/ТРЕНИРАНЕ.md: предизвикване без път обратно към регулация
+    # трупа напрежение, а при дисрегулирана нервна система може да влоши симптомите.
+    # Затова протокол за възстановяване е задължителен, а не препоръчителен.
+    if kind == "exposure" and not doc.get("recoveryProtocol"):
+        errors.append("експозиционен протокол без recoveryProtocol — предизвикване без "
+                      "метод за връщане в регулация не се пуска")
+
+    sides = doc.get("sides")
+    if isinstance(sides, list) and len(set(sides)) != len(sides):
+        errors.append("sides повтаря страна: %s" % sides)
+
+    if doc.get("measure") and not doc.get("steps") and "breathing" not in doc:
+        warnings.append("има measure, но няма какво да се изпълни между двете оценки")
 
     approval = doc.get("approval")
     status = doc.get("status")

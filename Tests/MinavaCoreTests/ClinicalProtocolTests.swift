@@ -131,3 +131,84 @@ extension ClinicalProtocolTests {
         }
     }
 }
+
+extension ClinicalProtocolTests {
+
+    // MARK: - Режим „Трениране“
+
+    private func regulation(
+        steps: [GroundingStep]? = [GroundingStep(text: LocalizedText(bg: "Издишай бавно"))],
+        measure: ClinicalProtocol.Measure? = nil,
+        rounds: Int? = nil,
+        sides: [ClinicalProtocol.Side]? = nil
+    ) -> ClinicalProtocol {
+        ClinicalProtocol(id: "test-regulation", version: 1, kind: .regulation,
+                         status: .draft, approval: nil,
+                         title: LocalizedText(bg: "Тест"),
+                         steps: steps, measure: measure, rounds: rounds, sides: sides)
+    }
+
+    func testARegulationProtocolNeedsSteps() {
+        XCTAssertNil(regulation().structuralDefect())
+        XCTAssertEqual(regulation(steps: []).structuralDefect(), .missingSteps)
+        XCTAssertEqual(regulation(steps: nil).structuralDefect(), .missingSteps)
+    }
+
+    func testRoundsAndSidesAreCarried() throws {
+        let file = regulation(rounds: 9, sides: [.right, .left])
+        XCTAssertNil(file.structuralDefect())
+        XCTAssertEqual(file.rounds, 9)
+        XCTAssertEqual(file.sides, [.right, .left])
+    }
+
+    func testTheSameSideTwiceIsADefect() {
+        XCTAssertEqual(regulation(sides: [.right, .right]).structuralDefect(), .repeatedSide)
+    }
+
+    /// Протокол с измерване се изпълнява като цикъл преди/след, не като еднократно
+    /// упражнение. Стойността се записва, броят повторения — не.
+    func testMeasureIsCarried() {
+        XCTAssertEqual(regulation(measure: .activation).measure, .activation)
+        XCTAssertNil(regulation().measure)
+    }
+
+    // MARK: - Гейтът за експозицията
+
+    /// Правилото от ТРЕНИРАНЕ.md: предизвикване без път обратно към регулация не се пуска.
+    /// Две независими източника предупреждават, че едностранчивото предизвикване трупа
+    /// напрежение и при дисрегулирана нервна система може да влоши симптомите.
+    func testExposureWithoutARecoveryProtocolIsRefused() {
+        let exposure = ClinicalProtocol(
+            id: "test-exposure", version: 1, kind: .exposure, status: .draft,
+            approval: nil, title: LocalizedText(bg: "Тест"))
+        XCTAssertEqual(exposure.structuralDefect(), .exposureWithoutRecovery)
+    }
+
+    func testExposureWithARecoveryProtocolIsAccepted() {
+        let exposure = ClinicalProtocol(
+            id: "test-exposure", version: 1, kind: .exposure, status: .draft,
+            approval: nil, title: LocalizedText(bg: "Тест"),
+            recoveryProtocol: "test-regulation")
+        XCTAssertNil(exposure.structuralDefect())
+    }
+
+    func testABreathingProtocolStillNeedsItsPlan() {
+        let empty = ClinicalProtocol(
+            id: "test-breathing", version: 1, kind: .breathing, status: .draft,
+            approval: nil, title: LocalizedText(bg: "Тест"))
+        XCTAssertEqual(empty.structuralDefect(), .missingBreathingPlan)
+    }
+
+    /// Схемата е договорът; Swift е неин четец. Видовете протокол не могат да се разминат.
+    func testKindsMatchTheSchema() throws {
+        let schema = try Fixtures.json(at: "clinical/schema/protocol.schema.json")
+        let kind = try node(schema, "properties", "kind")
+        let inSchema = Set(try XCTUnwrap(kind["enum"] as? [String]))
+
+        XCTAssertTrue(inSchema.contains("regulation"))
+        for value in inSchema {
+            XCTAssertNotNil(ClinicalProtocol.Kind(rawValue: value),
+                            "схемата допуска \(value), а Swift не го познава")
+        }
+    }
+}
