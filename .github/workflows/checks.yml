@@ -44,6 +44,9 @@ jobs:
       - name: Кризисните номера са в срок
         run: python tools/check_lines.py
 
+      - name: Прототипът носи същите практики като clinical/personal/
+        run: python tools/sync_prototype.py --check
+
   swift:
     name: Пакетът се строи и тестовете минават
     runs-on: macos-latest

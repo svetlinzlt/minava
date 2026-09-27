@@ -220,6 +220,82 @@
          min-height: 64px; border-top: 1px solid var(--line); }
   .row:last-of-type { border-bottom: 1px solid var(--line); }
 
+  /* --- Екран 7 · списъкът с упражнения ---
+     Режим „Трениране". Стои встрани от паник пътя: до него се стига нарочно, от
+     тихия надпис долу на входа, а не по невнимание. */
+  #practices { overflow-y: auto; padding-top: 0.5rem; }
+  #practices h2 { font-family: ui-serif, Georgia, serif; font-size: 1.5rem;
+                  margin: 0.5rem 0 0.35rem; }
+  #practices .lead { color: var(--quiet); font-size: 0.9rem; line-height: 1.5;
+                     margin: 0 0 1rem; }
+  .pick {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    width: 100%; min-height: 68px; padding: 0.9rem 1rem; margin-bottom: 0.6rem;
+    border: 1px solid var(--line); border-radius: 14px;
+    background: var(--paper); color: var(--pine); text-align: left;
+    font-size: 1.05rem;
+  }
+  .pick .meta { color: var(--quiet); font-size: 0.8rem; white-space: nowrap; }
+
+  /* --- Екран 8 · самото упражнение ---
+     Наследява подредбата на заземяването: дребен надпис горе, едър текст в средата,
+     едно действие долу. Разликата е, че бутонът чака минимума. */
+  #practice { justify-content: flex-end; }
+  /* Изходът и надписът къде сме делят един ред. И двете са дребни и тихи, а така
+     не се застъпват — и горният край остава празен, както на другите екрани. */
+  .topbar { flex: none; display: flex; align-items: center;
+            justify-content: space-between; gap: 1rem; min-height: 60px; }
+  #practice .step { color: var(--quiet); font-size: 0.95rem;
+                    letter-spacing: 0.06em; text-transform: uppercase;
+                    text-align: right; }
+  #practice .text {
+    flex: 1 1 auto; display: flex; align-items: center;
+    font-family: ui-serif, Georgia, serif;
+    font-size: clamp(1.8rem, 8vw, 2.6rem);
+    line-height: 1.25;
+  }
+  /* Изходът стои горе вляво, както при дишането, и по същата причина. Тук обаче е
+     от първия миг: упражнение между епизодите не е нещо, от което да те пазим. */
+  #pleave {
+    min-height: 60px; min-width: 96px;
+    display: flex; align-items: center;
+    padding: 0; text-align: left;
+    font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--quiet); background: none; border: none; width: auto;
+  }
+  /* Бутонът не изчезва и не посивява до неузнаваемост, докато минимумът тече —
+     сменя само надписа си. Изчезващ бутон кара човек да търси, а търсенето е
+     точно това, което упражнението се опитва да намали. */
+  button.waiting { background: transparent; color: var(--quiet); border-color: var(--line); }
+
+  /* --- Екран 9 · скалата ---
+     Единайсет цели в две реда. Докосване, не плъзгач: плъзгачът иска точност,
+     а точност с треперещи ръце няма. */
+  #rate { justify-content: flex-end; }
+  #rate .ask {
+    flex: 1 1 auto; display: flex; align-items: center;
+    font-family: ui-serif, Georgia, serif;
+    font-size: clamp(1.6rem, 7vw, 2.2rem); line-height: 1.3;
+  }
+  .grid {
+    flex: none; display: grid; gap: 0.5rem;
+    grid-template-columns: repeat(6, 1fr);
+    margin-bottom: 0.75rem;
+  }
+  .grid button { font-size: 1.3rem; min-height: 60px; padding: 0; }
+  #rate .ends { flex: none; display: flex; justify-content: space-between;
+                color: var(--quiet); font-size: 0.8rem; margin-bottom: 1rem; }
+
+  /* Тихият вход към упражненията, долу на екрана с „Дишай".
+     Над зоната за докосване, за да не я краде, и с цел от 60pt. */
+  #totrain {
+    position: absolute; left: 0; right: 0;
+    bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
+    min-height: 60px; width: auto;
+    background: none; border: none; color: var(--quiet);
+    font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase;
+  }
+
   /* Ограничаването на движението се спазва в кода, не със стил: точката спира да
      пълзи и се мести само при смяна на фаза. Информацията остава, движението — не. */
 </style>
@@ -233,6 +309,7 @@
   <div class="word">Дишай</div>
   <div class="sub">докосни където и да е</div>
   <button class="tapzone" id="tapzone" aria-label="Започни"></button>
+  <button id="totrain" data-go="practices">Упражнения</button>
 </section>
 
 <!-- ЕКРАН 1 · дишането -->
@@ -324,7 +401,11 @@
      За повечето хора то е опора; за част от хората броенето е самото натрапливо поведение.
      Решава се едно за всички след TestFlight, а не с настройка, която човек в паника да
      избира.</p>
-  <div class="row"><span>Последно измерване</span><span id="measured" class="muted">—</span></div>
+  <div class="row"><span>Секунди до първото вдишване</span><span id="measured" class="muted">—</span></div>
+  <div class="row"><span>Последна промяна в скалата</span><span id="lastchange" class="muted">—</span></div>
+  <p class="muted">Пази се <strong>само последната стойност</strong> — не график, не дни
+     подред, не брой упражнения. Серия при тревожен човек е вреда, а не насърчение.
+     Стойността стои на този телефон и не отива никъде.</p>
 
   <p class="muted"><strong>Какво не може да се провери тук.</strong> Вибрация — Safari на iOS
      няма надеждна вибрация, а вибрацията е упражнението. Джаджа на заключен екран, Контролен
@@ -340,6 +421,38 @@
   <div class="actions"><button data-go="enter">Отначало</button></div>
 </section>
 
+<!-- ЕКРАН 7 · упражненията -->
+<section class="screen" id="practices">
+  <h2>Упражнения</h2>
+  <p class="lead">Кратки практики за между епизодите. Правят се в спокоен момент, не по
+     време на атака — за това е „Дишай“.</p>
+  <p class="lead" id="presult" style="display:none"></p>
+  <div id="picklist"></div>
+  <p class="lead">Написани по книга на психолог Даниел Троев. <strong>Чернови са</strong> —
+     не са минали през него и формулировките са наши, не негови.</p>
+  <div class="actions"><button class="quiet" data-go="enter">Назад</button></div>
+</section>
+
+<!-- ЕКРАН 8 · едно упражнение -->
+<section class="screen" id="practice">
+  <div class="topbar">
+    <button id="pleave">Спри</button>
+    <div class="step" id="pstep">Стъпка 1</div>
+  </div>
+  <div class="text" id="ptext"></div>
+  <div class="actions"><button id="pnext">Продължи</button></div>
+  <button class="help" data-go="crisis">Помощ</button>
+</section>
+
+<!-- ЕКРАН 9 · скалата -->
+<section class="screen" id="rate">
+  <div class="ask" id="rask">Колко силно е сега?</div>
+  <div class="grid" id="rgrid"></div>
+  <div class="ends"><span>0 · спокойно</span><span>10 · най-силното</span></div>
+  <div class="actions"><button class="plain" id="rskip">Прескочи</button></div>
+</section>
+
+<script src="practices.js"></script>
 <script>
 (function () {
   "use strict";
@@ -363,7 +476,8 @@
   ];
 
   var el = function (id) { return document.getElementById(id); };
-  var screens = ["enter", "breathe", "pause", "ground", "after", "crisis", "about"];
+  var screens = ["enter", "breathe", "pause", "ground", "after", "crisis", "about",
+                 "practices", "practice", "rate"];
   var voiceOn = false;
   var SHOW_COUNT = true;
   var tapAt = 0, firstCueAt = 0;
@@ -551,6 +665,9 @@
 
   function stopEverything() {
     clearInterval(ticker);
+    // Излизането от упражнение — например през „Помощ" — не бива да остави таймера
+    // на стъпката да тече зад гърба на човека.
+    if (P) { clearInterval(P.gate); }
     if (window.speechSynthesis) { window.speechSynthesis.cancel(); }
   }
 
@@ -579,7 +696,12 @@
   }
 
   document.addEventListener("visibilitychange", function () {
-    if (document.hidden || !ticker) { return; }
+    if (document.hidden) { return; }
+    // Упражнението не се пренавива — то чака човека, а не обратното. Само надписът
+    // на бутона се пресмята наново, защото докато страницата е била скрита,
+    // таймерът е спрял и секундите на екрана са остарели.
+    if (el("practice").classList.contains("on")) { refreshGate(); }
+    if (!ticker) { return; }
     rewindToCycleStart();
     tick();
   });
@@ -635,6 +757,213 @@
     el("voicebtn").textContent = voiceOn ? "включен" : "изключен";
     if (voiceOn) { speak("Готово"); }
   });
+
+  // ------------------------------------------------------------------
+  // Режим „Трениране"
+  //
+  // Същият ред като PracticeSession в MinavaPanic: оценка, стъпки, оценка. Часовник
+  // има само за едно нещо — минимумът на стъпката, който е ПОД, а не краен срок.
+  // Нищо не се придвижва само; човекът натиска.
+  // ------------------------------------------------------------------
+
+  var CATALOGUE = window.MINAVA_PRACTICES || [];
+  var SIDE_WORD = { right: "дясна страна", left: "лява страна" };
+  var P = { practice: null, seq: [], index: 0, before: null, after: null,
+            stepAt: 0, asking: null, gate: 0 };
+
+  // Разгъва кръговете и страните в един плосък ред — точно както прави
+  // ExecutablePractice.sequence. Подготовката е веднъж отпред и е кръг 0.
+  function sequenceOf(p) {
+    var out = [], sides = (p.sides && p.sides.length) ? p.sides : [null];
+    var rounds = p.rounds || 1, r, s, k;
+
+    (p.preparation || []).forEach(function (st) {
+      out.push({ bg: st.bg, min: st.min, round: 0, side: null });
+    });
+    for (r = 1; r <= rounds; r++) {
+      for (s = 0; s < sides.length; s++) {
+        for (k = 0; k < p.steps.length; k++) {
+          out.push({ bg: p.steps[k].bg, min: p.steps[k].min, round: r, side: sides[s] });
+        }
+      }
+    }
+    return out;
+  }
+
+  function stepLabel(step) {
+    if (step.round === 0) { return "Подготовка"; }
+    var parts = [], p = P.practice;
+    if (p.rounds && p.rounds > 1) { parts.push("Кръг " + step.round + " от " + p.rounds); }
+    if (step.side) { parts.push(SIDE_WORD[step.side] || step.side); }
+    if (!parts.length) {
+      var body = P.seq.filter(function (s) { return s.round > 0; });
+      parts.push("Стъпка " + (body.indexOf(step) + 1) + " от " + body.length);
+    }
+    return parts.join(" · ");
+  }
+
+  // --- една стойност, не история ---
+  function saveReading(before, after, id) {
+    try {
+      localStorage.setItem("minava.activation", JSON.stringify(
+        { before: before, after: after, id: id, at: Date.now() }));
+    } catch (e) { /* частен прозорец, изчистени данни — не е грешка */ }
+    showLastReading();
+  }
+
+  function lastReading() {
+    try { return JSON.parse(localStorage.getItem("minava.activation")); }
+    catch (e) { return null; }
+  }
+
+  function showLastReading() {
+    var r = lastReading();
+    if (!r) { el("lastchange").textContent = "—"; return; }
+    var old = (Date.now() - r.at) > 7 * 24 * 3600 * 1000;
+    el("lastchange").textContent = r.before + " → " + r.after + (old ? " · отпреди време" : "");
+  }
+
+  function renderList() {
+    var list = el("picklist");
+    list.innerHTML = "";
+    CATALOGUE.forEach(function (p) {
+      var b = document.createElement("button");
+      b.className = "pick";
+      var name = document.createElement("span");
+      name.textContent = p.title;
+      var meta = document.createElement("span");
+      meta.className = "meta";
+      meta.textContent = (p.rounds && p.rounds > 1) ? (p.rounds + " кръга")
+                       : (p.sides ? "две страни" : "");
+      b.appendChild(name);
+      b.appendChild(meta);
+      b.addEventListener("click", function () { startPractice(p); });
+      list.appendChild(b);
+    });
+  }
+
+  function startPractice(p) {
+    P.practice = p;
+    P.seq = sequenceOf(p);
+    P.index = 0;
+    P.before = null;
+    P.after = null;
+    el("presult").style.display = "none";
+    if (p.measure) { askRating(true); } else { runStep(0); }
+  }
+
+  function askRating(isBefore) {
+    P.asking = isBefore ? "before" : "after";
+    el("rask").textContent = isBefore
+      ? "Колко силно е сега?"
+      : "А сега колко силно е?";
+    // „Прескочи" е истинска опция. Измерване, което се иска, престава да е измерване
+    // и става условие за упражнението.
+    el("rskip").textContent = isBefore ? "Без оценка" : "Прескочи";
+    show("rate");
+  }
+
+  function rate(value) {
+    if (P.asking === "before") { P.before = value; runStep(0); return; }
+    if (P.asking === "after") { P.after = value; finishPractice(); }
+  }
+
+  function runStep(index) {
+    P.asking = null;
+    if (index >= P.seq.length) {
+      if (P.practice.measure && P.before !== null) { askRating(false); }
+      else { finishPractice(); }
+      return;
+    }
+    P.index = index;
+    P.stepAt = performance.now();
+    var step = P.seq[index];
+    el("pstep").textContent = stepLabel(step);
+    el("ptext").textContent = step.bg;
+    speak(step.bg);
+    show("practice");
+    refreshGate();
+  }
+
+  // Бутонът чака минимума и казва колко остава. Не изчезва: изчезващ бутон кара
+  // човек да търси, а търсенето е точно обратното на упражнението.
+  function refreshGate() {
+    clearInterval(P.gate);
+    var step = P.seq[P.index];
+    var last = P.index === P.seq.length - 1;
+    var label = last ? "Готово" : "Продължи";
+
+    function paint() {
+      var left = step.min ? Math.ceil(step.min - (performance.now() - P.stepAt) / 1000) : 0;
+      if (left > 0) {
+        el("pnext").textContent = "още " + left + " сек";
+        el("pnext").classList.add("waiting");
+      } else {
+        el("pnext").textContent = label;
+        el("pnext").classList.remove("waiting");
+        clearInterval(P.gate);
+      }
+    }
+    paint();
+    if (step.min) { P.gate = setInterval(paint, 250); }
+  }
+
+  function canAdvance() {
+    var step = P.seq[P.index];
+    if (!step || !step.min) { return true; }
+    return (performance.now() - P.stepAt) / 1000 >= step.min;
+  }
+
+  function finishPractice() {
+    clearInterval(P.gate);
+    if (window.speechSynthesis) { window.speechSynthesis.cancel(); }
+
+    if (P.before !== null && P.after !== null) {
+      saveReading(P.before, P.after, P.practice.id);
+      el("presult").textContent = "Беше " + P.before + ". Сега " + P.after + ".";
+      el("presult").style.display = "";
+    }
+    show("practices");
+  }
+
+  // Спирането е винаги възможно и не пази нищо. Половин измерване не е измерване.
+  function stopPractice() {
+    clearInterval(P.gate);
+    if (window.speechSynthesis) { window.speechSynthesis.cancel(); }
+    P.before = null;
+    P.after = null;
+    el("presult").style.display = "none";
+    show("practices");
+  }
+
+  el("pnext").addEventListener("click", function () {
+    // Докосване по-рано не прави нищо, но презаписва надписа. Браузърът забавя
+    // таймерите на скрита страница, така че надписът може да е остарял — а остарял
+    // надпис пред човек, който тъкмо е натиснал, е точно моментът, в който трябва
+    // да е верен.
+    if (!canAdvance()) { refreshGate(); return; }
+    runStep(P.index + 1);
+  });
+  el("pleave").addEventListener("click", stopPractice);
+  el("rskip").addEventListener("click", function () {
+    if (P.asking === "before") { runStep(0); } else { finishPractice(); }
+  });
+
+  (function buildScale() {
+    var grid = el("rgrid"), i;
+    for (i = 0; i <= 10; i++) {
+      (function (value) {
+        var b = document.createElement("button");
+        b.className = "quiet";
+        b.textContent = String(value);
+        b.addEventListener("click", function () { rate(value); });
+        grid.appendChild(b);
+      }(i));
+    }
+  }());
+
+  renderList();
+  showLastReading();
 
   refreshVoiceRow();
   if (window.speechSynthesis) {
