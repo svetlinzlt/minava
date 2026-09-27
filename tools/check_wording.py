@@ -40,6 +40,28 @@ def visible_text(path, raw):
     return raw
 
 
+def expand(entries, notes):
+    """Разгъва папките в списъка до отделни файлове.
+
+    Един ред в списъка може да сочи папка — `clinical/personal/`. Причината е, че тази
+    папка расте: всяка нова практика носи текст, който човек чете от екран, и списък,
+    който трябва да се допълва на ръка, рано или късно изостава мълчаливо.
+    """
+    result = []
+    for relative in entries:
+        path = os.path.join(ROOT, relative.replace("/", os.sep))
+        if os.path.isdir(path):
+            for name in sorted(os.listdir(path)):
+                if not name.startswith("."):
+                    result.append("%s/%s" % (relative.rstrip("/"), name))
+            continue
+        if not os.path.exists(path):
+            notes.append("%s още не съществува — ще се проверява, щом го има" % relative)
+            continue
+        result.append(relative)
+    return result
+
+
 def allowances(data):
     allowed = {}
     for entry in data.get("allow", []):
@@ -54,11 +76,8 @@ def main():
     errors, notes = [], []
     scanned = 0
 
-    for relative in data.get("scan", []):
+    for relative in expand(data.get("scan", []), notes):
         path = os.path.join(ROOT, relative.replace("/", os.sep))
-        if not os.path.exists(path):
-            notes.append("%s още не съществува — ще се проверява, щом го има" % relative)
-            continue
 
         scanned += 1
         raw = io.open(path, encoding="utf-8", errors="replace").read()

@@ -10,7 +10,21 @@ import Foundation
 /// approved in writing, per version, by a qualified professional.
 public struct ClinicalProtocol: Codable, Equatable, Sendable {
     public enum Kind: String, Codable, Sendable {
-        case breathing, grounding, exposure, screening, crisisPath = "crisis-path"
+        case breathing, grounding, exposure, screening
+        /// Short practices run between episodes, not during one. They are the substance of
+        /// the training mode described in docs/ТРЕНИРАНЕ.md.
+        case regulation
+        case crisisPath = "crisis-path"
+    }
+
+    /// What the person rates before and after, when the protocol is meant to be run as a
+    /// loop rather than as a one-off exercise.
+    public enum Measure: String, Codable, Sendable {
+        case activation = "activation-0-10"
+    }
+
+    public enum Side: String, Codable, Sendable {
+        case right, left
     }
 
     public enum Status: String, Codable, Sendable {
@@ -27,6 +41,24 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
     public let excludedBy: String?
     public let breathing: BreathingPlan?
     public let steps: [GroundingStep]?
+    /// Shown once before the rounds begin, and never repeated.
+    ///
+    /// Getting into position is not part of the exercise. A practice with nine rounds must
+    /// not tell someone nine times where to put their hands.
+    public let preparation: [GroundingStep]?
+    /// Present when the protocol asks for a rating before and after.
+    public let measure: Measure?
+    /// How many times the whole sequence of `steps` repeats. A round is one pass through
+    /// the steps, not one breath.
+    public let rounds: Int?
+    /// Sides the exercise is performed on, in order.
+    public let sides: [Side]?
+    /// The regulation protocol that must follow this one.
+    ///
+    /// Required for `.exposure`. Challenging without a way back into regulation accumulates
+    /// tension, and where the nervous system is already dysregulated it can make symptoms
+    /// worse — so an exposure protocol without one is refused rather than run.
+    public let recoveryProtocol: String?
     public let notes: String?
 
     /// Whether a release build is allowed to execute this protocol.
@@ -54,6 +86,11 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
         excludedBy: String? = nil,
         breathing: BreathingPlan? = nil,
         steps: [GroundingStep]? = nil,
+        preparation: [GroundingStep]? = nil,
+        measure: Measure? = nil,
+        rounds: Int? = nil,
+        sides: [Side]? = nil,
+        recoveryProtocol: String? = nil,
         notes: String? = nil
     ) {
         self.schemaVersion = schemaVersion
@@ -66,8 +103,43 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
         self.excludedBy = excludedBy
         self.breathing = breathing
         self.steps = steps
+        self.preparation = preparation
+        self.measure = measure
+        self.rounds = rounds
+        self.sides = sides
+        self.recoveryProtocol = recoveryProtocol
         self.notes = notes
     }
+
+    /// Whether this file is internally consistent, beyond what the schema can express.
+    ///
+    /// Kept separate from `isExecutableInRelease`: approval is about who signed it, this is
+    /// about whether it makes sense at all.
+    public func structuralDefect() -> StructuralDefect? {
+        switch kind {
+        case .breathing where breathing == nil:
+            return .missingBreathingPlan
+        case .grounding, .regulation:
+            if (steps ?? []).isEmpty { return .missingSteps }
+        case .exposure:
+            if recoveryProtocol == nil { return .exposureWithoutRecovery }
+            if (steps ?? []).isEmpty { return .missingSteps }
+        default:
+            break
+        }
+        if let rounds, rounds < 1 { return .roundsOutOfBounds(rounds) }
+        if let sides, Set(sides).count != sides.count { return .repeatedSide }
+        return nil
+    }
+}
+
+public enum StructuralDefect: Error, Equatable, Sendable {
+    case missingBreathingPlan
+    case missingSteps
+    /// The rule from docs/ТРЕНИРАНЕ.md, made impossible to forget.
+    case exposureWithoutRecovery
+    case roundsOutOfBounds(Int)
+    case repeatedSide
 }
 
 public struct Approval: Codable, Equatable, Sendable {

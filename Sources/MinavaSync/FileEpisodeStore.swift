@@ -110,12 +110,19 @@ public struct EpisodeExport: Codable, Equatable, Sendable {
     public let version: Int
     public let exportedAt: Date
     public let episodes: [Episode]
+    /// The one reading kept, if there is one. Singular on purpose — see ActivationReading.
+    public let activation: ActivationReading?
 
-    public init(episodes: [Episode], exportedAt: Date = Date()) {
+    public init(
+        episodes: [Episode],
+        activation: ActivationReading? = nil,
+        exportedAt: Date = Date()
+    ) {
         self.format = "minava-episodes"
         self.version = 1
         self.exportedAt = exportedAt
         self.episodes = episodes
+        self.activation = activation
     }
 
     public func encoded() throws -> Data {
@@ -161,6 +168,13 @@ public struct EpisodeExport: Codable, Equatable, Sendable {
         }
 
         if episodes.isEmpty { lines.append("(няма записи)") }
+
+        if let activation {
+            lines.append("")
+            lines.append("Последно измерване преди и след упражнение: "
+                         + "\(activation.before) → \(activation.after)")
+        }
+
         return lines.joined(separator: "\n") + "\n"
     }
 }

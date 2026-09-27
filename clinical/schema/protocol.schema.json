@@ -35,6 +35,7 @@
       "enum": [
         "breathing",
         "grounding",
+        "regulation",
         "exposure",
         "screening",
         "crisis-path"
@@ -266,6 +267,43 @@
         }
       }
     },
+    "preparation": {
+      "description": "Shown once before the rounds begin, and never repeated. Getting into position is not part of the exercise: a practice with nine rounds must not tell someone nine times where to put their hands.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "bg"
+            ],
+            "properties": {
+              "bg": {
+                "type": "string",
+                "minLength": 2
+              },
+              "en": {
+                "type": "string",
+                "minLength": 2
+              }
+            }
+          },
+          "minDuration": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 120
+          }
+        }
+      }
+    },
     "steps": {
       "description": "Required when kind is grounding. Wording is clinical content; the engine only counts and displays.",
       "type": "array",
@@ -306,6 +344,37 @@
     "notes": {
       "description": "Free text for the reviewer. Never shown to the person using the app.",
       "type": "string"
+    },
+    "measure": {
+      "description": "What the person is asked to rate before and after. Present only when the protocol is meant to be run as a before/after loop — the way docs/ТРЕНИРАНЕ.md describes training, rather than as a one-off exercise.",
+      "type": "string",
+      "enum": [
+        "activation-0-10"
+      ]
+    },
+    "rounds": {
+      "description": "How many times the whole sequence of steps repeats. Distinct from breathing.repeat.cycles: a round is one pass through `steps`, not one breath.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 30
+    },
+    "sides": {
+      "description": "Sides the exercise is performed on, in order. Omit for exercises that have no sides.",
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "string",
+        "enum": [
+          "right",
+          "left"
+        ]
+      }
+    },
+    "recoveryProtocol": {
+      "description": "Identifier of the regulation protocol that must follow this one. REQUIRED for kind exposure: two independent sources warn that challenging without a way back into regulation accumulates tension, and can worsen symptoms where the nervous system is already dysregulated. The rule is a property of the schema so that nobody has to remember it.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{2,48}$"
     }
   }
 }
