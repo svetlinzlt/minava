@@ -185,11 +185,25 @@ extension ClinicalProtocolTests {
     }
 
     func testExposureWithARecoveryProtocolIsAccepted() {
-        let exposure = ClinicalProtocol(
+        XCTAssertNil(exposure(recovery: "test-regulation").structuralDefect())
+    }
+
+    /// Предизвикване без инструкции е празен екран, на който пише, че се прави нещо.
+    /// Стъпките са задължителни по същата причина, по която са задължителни и при
+    /// заземяването — там стои текстът, който човек чете.
+    func testExposureWithoutStepsIsRefused() {
+        XCTAssertEqual(exposure(recovery: "test-regulation", steps: []).structuralDefect(),
+                       .missingSteps)
+    }
+
+    private func exposure(
+        recovery: String?,
+        steps: [GroundingStep] = [GroundingStep(text: LocalizedText(bg: "Кратко усилие"))]
+    ) -> ClinicalProtocol {
+        ClinicalProtocol(
             id: "test-exposure", version: 1, kind: .exposure, status: .draft,
-            approval: nil, title: LocalizedText(bg: "Тест"),
-            recoveryProtocol: "test-regulation")
-        XCTAssertNil(exposure.structuralDefect())
+            approval: nil, title: LocalizedText(bg: "Тест"), steps: steps,
+            recoveryProtocol: recovery)
     }
 
     func testABreathingProtocolStillNeedsItsPlan() {

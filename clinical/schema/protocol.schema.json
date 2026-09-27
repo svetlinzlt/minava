@@ -267,6 +267,43 @@
         }
       }
     },
+    "preparation": {
+      "description": "Shown once before the rounds begin, and never repeated. Getting into position is not part of the exercise: a practice with nine rounds must not tell someone nine times where to put their hands.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "bg"
+            ],
+            "properties": {
+              "bg": {
+                "type": "string",
+                "minLength": 2
+              },
+              "en": {
+                "type": "string",
+                "minLength": 2
+              }
+            }
+          },
+          "minDuration": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 120
+          }
+        }
+      }
+    },
     "steps": {
       "description": "Required when kind is grounding. Wording is clinical content; the engine only counts and displays.",
       "type": "array",

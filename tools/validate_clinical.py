@@ -26,6 +26,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCHEMA_PATH = os.path.join(ROOT, "clinical", "schema", "protocol.schema.json")
 PROTOCOL_DIR = os.path.join(ROOT, "clinical", "protocols")
 EXAMPLE_DIR = os.path.join(ROOT, "clinical", "examples")
+PERSONAL_DIR = os.path.join(ROOT, "clinical", "personal")
 
 MAX_TOTAL_SECONDS = 20 * 60
 PHASE_ORDER = ["inhale", "holdIn", "exhale", "holdOut"]
@@ -126,7 +127,7 @@ def check_consistency(doc, errors, warnings):
     kind = doc.get("kind")
     if kind == "breathing" and "breathing" not in doc:
         errors.append("kind е breathing, но липсва блокът breathing")
-    if kind in ("grounding", "regulation") and not doc.get("steps"):
+    if kind in ("grounding", "regulation", "exposure") and not doc.get("steps"):
         errors.append("kind е %s, но липсват steps" % kind)
 
     # Правилото от docs/ТРЕНИРАНЕ.md: предизвикване без път обратно към регулация
@@ -234,20 +235,51 @@ def collect(directory):
                   for name in os.listdir(directory) if name.endswith(".json"))
 
 
+def check_references(docs, errors_by_path):
+    """Проверките, които изискват да са прочетени всички файлове наведнъж.
+
+    Един файл сам по себе си може да е изряден и пак да сочи в празното. Протокол за
+    възстановяване, който не съществува, оставя човек в нарочно вдигнато състояние без
+    път обратно — затова липсващата препратка е грешка, а не бележка.
+    """
+    known = set()
+    for _, doc in docs:
+        if isinstance(doc, dict) and doc.get("id"):
+            known.add(doc["id"])
+
+    for path, doc in docs:
+        if not isinstance(doc, dict):
+            continue
+        for field in ("recoveryProtocol", "excludedBy"):
+            target = doc.get(field)
+            if target and target not in known:
+                errors_by_path.setdefault(path, []).append(
+                    "%s сочи към %r, а такъв протокол няма" % (field, target))
+
+
 def main():
     release = "--release" in sys.argv
     schema = json.load(io.open(SCHEMA_PATH, encoding="utf-8"))
 
     shipped = collect(PROTOCOL_DIR)
     examples = collect(EXAMPLE_DIR)
+    # Практиките за личния билд. Те не са одобрени и не излизат публично — точно затова
+    # стоят в отделна папка, а не сред одобреното.
+    personal = collect(PERSONAL_DIR)
     failed = 0
     seen_ids = {}
+    extra = {}
+    docs = []
 
-    for path in shipped + examples:
+    for path in shipped + examples + personal:
+        docs.append((path, load(path, [])))
+    check_references(docs, extra)
+
+    for path, doc in docs:
         rel = os.path.relpath(path, ROOT).replace(os.sep, "/")
         errors, warnings = validate_file(path, schema)
+        errors.extend(extra.get(path, []))
 
-        doc = load(path, [])
         if isinstance(doc, dict) and doc.get("id"):
             if doc["id"] in seen_ids:
                 errors.append("id %r се използва и в %s" % (doc["id"], seen_ids[doc["id"]]))
@@ -257,6 +289,12 @@ def main():
             if not isinstance(doc, dict) or doc.get("status") != "approved":
                 errors.append("релийз билд: протокол без писмено одобрение")
 
+        # Одобрен файл в личната папка е сгрешено място, а не постижение: одобреното
+        # живее в protocols/, където режимът за релийз го търси.
+        if path in personal and isinstance(doc, dict) and doc.get("status") == "approved":
+            errors.append("одобрен файл в clinical/personal/ — мястото му е в "
+                          "clinical/protocols/")
+
         for message in errors:
             print("ГРЕШКА  %s: %s" % (rel, message))
         for message in warnings:
@@ -264,10 +302,13 @@ def main():
         if errors:
             failed += 1
 
-    total = len(shipped) + len(examples)
+    total = len(docs)
     if release and not shipped:
         print("бележка clinical/protocols/: няма нито един одобрен протокол — "
               "приложението се пуска без съответната част")
+    if release and personal:
+        print("бележка clinical/personal/: %d практики, които не влизат в публично "
+              "издание" % len(personal))
 
     print("проверени %d файла, %d с грешки%s"
           % (total, failed, " (режим релийз)" if release else ""))

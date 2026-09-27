@@ -41,6 +41,11 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
     public let excludedBy: String?
     public let breathing: BreathingPlan?
     public let steps: [GroundingStep]?
+    /// Shown once before the rounds begin, and never repeated.
+    ///
+    /// Getting into position is not part of the exercise. A practice with nine rounds must
+    /// not tell someone nine times where to put their hands.
+    public let preparation: [GroundingStep]?
     /// Present when the protocol asks for a rating before and after.
     public let measure: Measure?
     /// How many times the whole sequence of `steps` repeats. A round is one pass through
@@ -81,6 +86,7 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
         excludedBy: String? = nil,
         breathing: BreathingPlan? = nil,
         steps: [GroundingStep]? = nil,
+        preparation: [GroundingStep]? = nil,
         measure: Measure? = nil,
         rounds: Int? = nil,
         sides: [Side]? = nil,
@@ -97,6 +103,7 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
         self.excludedBy = excludedBy
         self.breathing = breathing
         self.steps = steps
+        self.preparation = preparation
         self.measure = measure
         self.rounds = rounds
         self.sides = sides
@@ -114,8 +121,9 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
             return .missingBreathingPlan
         case .grounding, .regulation:
             if (steps ?? []).isEmpty { return .missingSteps }
-        case .exposure where recoveryProtocol == nil:
-            return .exposureWithoutRecovery
+        case .exposure:
+            if recoveryProtocol == nil { return .exposureWithoutRecovery }
+            if (steps ?? []).isEmpty { return .missingSteps }
         default:
             break
         }

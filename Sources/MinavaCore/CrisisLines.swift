@@ -114,7 +114,8 @@ public struct CrisisDirectory: Sendable {
 
     /// What the screen shows.
     ///
-    /// In a release build only lines verified within the last year are offered. Everything
+    /// In a release or personal build only lines verified within the last year are offered.
+    /// Everything
     /// else is withheld — not because the number is certainly wrong, but because nobody can
     /// say it is right. If that leaves nothing, the emergency number stands alone, which is
     /// exactly what docs/ГОДИШЕН-ЦИКЪЛ.md says happens when a spring window is missed.
@@ -126,13 +127,12 @@ public struct CrisisDirectory: Sendable {
         calendar: Calendar = Calendar(identifier: .gregorian)
     ) -> [CrisisLine] {
         let candidates: [CrisisLine]
-        switch build {
-        case .debug:
-            candidates = lines
-        case .release:
+        if build.requiresVerifiedCrisisLines {
             candidates = lines.filter {
                 $0.isCurrent(on: day, validDays: validDays, calendar: calendar)
             }
+        } else {
+            candidates = lines
         }
 
         let ordered = CrisisDirectory.ordered(candidates)
