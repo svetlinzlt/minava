@@ -13,7 +13,10 @@ final class ExecutablePracticeTests: XCTestCase {
         rounds: Int? = nil,
         sides: [ClinicalProtocol.Side]? = nil,
         measure: ClinicalProtocol.Measure? = nil,
-        recovery: String? = nil
+        recovery: String? = nil,
+        section: ClinicalProtocol.Section? = .nervousSystem,
+        stopRule: String? = nil,
+        minutes: Int? = nil
     ) -> ClinicalProtocol {
         ClinicalProtocol(
             id: id,
@@ -26,6 +29,9 @@ final class ExecutablePracticeTests: XCTestCase {
             preparation: preparation.isEmpty
                 ? nil
                 : preparation.map { GroundingStep(text: LocalizedText(bg: $0)) },
+            section: section,
+            estimatedMinutes: minutes,
+            stopRule: stopRule.map { LocalizedText(bg: $0) },
             measure: measure,
             rounds: rounds,
             sides: sides,
@@ -153,5 +159,46 @@ final class ExecutablePracticeTests: XCTestCase {
     func testTheMeasureTravelsWithThePractice() throws {
         let practice = try ExecutablePractice(file(measure: .activation), build: .debug)
         XCTAssertEqual(practice.measure, .activation)
+    }
+
+    // MARK: - Секцията и правилото за спиране
+
+    /// Практика без секция не се показва никъде — каталогът е групиран.
+    func testAPracticeWithoutASectionIsRefused() {
+        XCTAssertThrowsError(try ExecutablePractice(file(section: nil), build: .debug)) {
+            XCTAssertEqual($0 as? ProtocolGateError, .structural(id: "practice",
+                                                                 .missingSection))
+        }
+    }
+
+    /// Правилото от docs/ТРЕВОЖНОСТ.md: около 8% обща честота на нежеланите събития при
+    /// медитация, а най-честото от тях е самата тревожност. Без изход не се предлага.
+    func testAnAttentionPracticeWithoutAStopRuleIsRefused() {
+        let meditation = file(section: .attention)
+        XCTAssertThrowsError(try ExecutablePractice(meditation, build: .debug)) {
+            XCTAssertEqual($0 as? ProtocolGateError,
+                           .structural(id: "practice", .attentionWithoutStopRule))
+        }
+    }
+
+    func testAnAttentionPracticeWithAStopRuleCarriesIt() throws {
+        let practice = try ExecutablePractice(
+            file(section: .attention, stopRule: "Стане ли по-тежко, спри."), build: .debug)
+        XCTAssertEqual(practice.section, .attention)
+        XCTAssertEqual(practice.stopRule?.bg, "Стане ли по-тежко, спри.")
+    }
+
+    /// Правилото важи само там, където трябва: другите секции не го искат.
+    func testOtherSectionsDoNotNeedAStopRule() {
+        for section in ClinicalProtocol.Section.allCases where section != .attention {
+            let subject = file(recovery: section == .challenge ? "calm-down" : nil,
+                               section: section)
+            XCTAssertNil(subject.structuralDefect(), "\(section)")
+        }
+    }
+
+    func testTheDurationTravelsWithThePractice() throws {
+        XCTAssertEqual(try ExecutablePractice(file(minutes: 3), build: .debug)
+                        .estimatedMinutes, 3)
     }
 }

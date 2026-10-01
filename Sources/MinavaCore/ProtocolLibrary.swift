@@ -37,6 +37,22 @@ public struct ProtocolLibrary: Sendable {
         practices.filter { $0.kind == .regulation }
     }
 
+    public struct Group: Sendable {
+        public let section: ClinicalProtocol.Section
+        public let practices: [ExecutablePractice]
+    }
+
+    /// The catalogue, grouped and in the fixed section order.
+    ///
+    /// Empty sections are left out rather than shown empty: a heading with nothing under it
+    /// tells a person there is something missing, which is not the message.
+    public var groups: [Group] {
+        ClinicalProtocol.Section.allCases.compactMap { section in
+            let found = practices.filter { $0.section == section }
+            return found.isEmpty ? nil : Group(section: section, practices: found)
+        }
+    }
+
     /// Reads every `.json` file in a directory.
     ///
     /// A missing directory is not an error. `clinical/protocols/` is empty until a

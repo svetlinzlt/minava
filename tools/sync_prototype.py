@@ -31,11 +31,12 @@ TARGET = os.path.join(ROOT, "docs", "prototype", "practices.js")
 # Видовете, които прототипът има право да показва.
 PUBLISHABLE_KINDS = ("regulation", "grounding")
 
-# Редът на списъка. Азбучният ред по id е случаен за човека, който гледа екрана, а
-# първите две-три неща са единствените, които някой ще пробва в лош ден. Затова най-
-# отпред стоят най-късите и най-физическите, а въпросите — най-отзад.
-#
-# Практика, която не е в списъка, не изчезва: влиза накрая, по азбучен ред.
+# Редът на секциите на екрана. Отпред е онова, което човек посяга да направи, когато
+# вече се чувства зле; отзад — онова, което се прави в спокоен момент.
+SECTION_ORDER = ["nervous-system", "worry", "attention", "action", "mindset"]
+
+# Редът вътре в секция. Практика, която не е в списъка, не изчезва: влиза накрая, по
+# азбучен ред.
 ORDER = [
     "cold-water",
     "shoulders-belly-release",
@@ -48,6 +49,17 @@ ORDER = [
     "humming",
     "salamander",
     "nadi-shodhana",
+    "worry-postponement",
+    "thought-not-command",
+    "detached-observation",
+    "worry-window",
+    "three-breaths",
+    "breath-anchor",
+    "sounds-around",
+    "body-scan-slow",
+    "one-small-step",
+    "what-matters",
+    "movement-dose",
     "normalizing-attitude",
     "three-steps-support",
     "safety-questions",
@@ -96,8 +108,13 @@ def collect():
         entry = {
             "id": doc["id"],
             "title": doc["title"]["bg"],
+            "section": doc["section"],
             "steps": steps_of(doc, "steps"),
         }
+        if doc.get("estimatedMinutes"):
+            entry["minutes"] = doc["estimatedMinutes"]
+        if doc.get("stopRule"):
+            entry["stopRule"] = doc["stopRule"]["bg"]
         preparation = steps_of(doc, "preparation")
         if preparation:
             entry["preparation"] = preparation
@@ -110,7 +127,10 @@ def collect():
         practices.append(entry)
 
     def rank(entry):
-        return (ORDER.index(entry["id"]) if entry["id"] in ORDER else len(ORDER),
+        section = entry.get("section")
+        return (SECTION_ORDER.index(section) if section in SECTION_ORDER
+                else len(SECTION_ORDER),
+                ORDER.index(entry["id"]) if entry["id"] in ORDER else len(ORDER),
                 entry["id"])
 
     practices.sort(key=rank)

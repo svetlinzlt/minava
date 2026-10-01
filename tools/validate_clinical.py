@@ -31,6 +31,11 @@ PERSONAL_DIR = os.path.join(ROOT, "clinical", "personal")
 MAX_TOTAL_SECONDS = 20 * 60
 PHASE_ORDER = ["inhale", "holdIn", "exhale", "holdOut"]
 
+# Таванът за една стъпка. Измерен, не избран: при най-едрия Dynamic Type текстът на
+# стъпката се изписва с около 95 px и 95-знакова стъпка иска 1670 px височина при
+# около 580 налични. Виж docs/ОПТИМИЗАЦИЯ.md, точка 1.
+STEP_LIMIT = 70
+
 
 # --- малкият интерпретатор на схемата ---------------------------------------
 
@@ -136,6 +141,26 @@ def check_consistency(doc, errors, warnings):
     if kind == "exposure" and not doc.get("recoveryProtocol"):
         errors.append("експозиционен протокол без recoveryProtocol — предизвикване без "
                       "метод за връщане в регулация не се пуска")
+
+    # Практика без секция не се показва никъде — каталогът е групиран, откакто мина
+    # петнайсет практики и плоският списък спря да работи.
+    if kind in ("grounding", "regulation", "exposure") and not doc.get("section"):
+        errors.append("kind е %s, но липсва section" % kind)
+
+    # Правилото от docs/ТРЕВОЖНОСТ.md. Систематичен преглед дава около 8% обща честота
+    # на нежеланите събития при медитация, а най-честото от тях е самата тревожност.
+    # Приложение, което подава медитация на тревожен човек и мълчи, е небрежно.
+    if doc.get("section") == "attention" and not doc.get("stopRule"):
+        errors.append("практика от секция attention без stopRule — медитация без правило "
+                      "за спиране не се предлага")
+
+    steps = doc.get("steps") or []
+    for index, step in enumerate(steps + (doc.get("preparation") or [])):
+        text = ((step or {}).get("text") or {}).get("bg") or ""
+        if len(text) > STEP_LIMIT:
+            errors.append("стъпка %d е %d знака, таванът е %d — при най-едрия Dynamic Type "
+                          "по-дълга стъпка изхвърля бутона извън екрана"
+                          % (index + 1, len(text), STEP_LIMIT))
 
     sides = doc.get("sides")
     if isinstance(sides, list) and len(set(sides)) != len(sides):

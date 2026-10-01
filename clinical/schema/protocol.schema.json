@@ -267,6 +267,42 @@
         }
       }
     },
+    "section": {
+      "description": "Which group of the catalogue this practice belongs to. The list passed fifteen practices and a flat list stops working: a person does not read thirty lines to choose one. Required for grounding, regulation and exposure.",
+      "type": "string",
+      "enum": [
+        "nervous-system",
+        "mindset",
+        "worry",
+        "attention",
+        "action",
+        "challenge"
+      ]
+    },
+    "estimatedMinutes": {
+      "description": "Roughly how long the practice takes, shown next to its name. The difference between trying and skipping is often knowing it is three minutes and not twenty.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20
+    },
+    "stopRule": {
+      "description": "What to do if the practice makes things worse, shown with the practice itself. REQUIRED for section attention: a systematic review puts adverse events in meditation at roughly 8% overall, and the single most common one reported is anxiety itself. An app that hands meditation to an anxious person and says nothing about that is careless.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bg"
+      ],
+      "properties": {
+        "bg": {
+          "type": "string",
+          "minLength": 2
+        },
+        "en": {
+          "type": "string",
+          "minLength": 2
+        }
+      }
+    },
     "preparation": {
       "description": "Shown once before the rounds begin, and never repeated. Getting into position is not part of the exercise: a practice with nine rounds must not tell someone nine times where to put their hands.",
       "type": "array",

@@ -145,7 +145,8 @@ extension ClinicalProtocolTests {
         ClinicalProtocol(id: "test-regulation", version: 1, kind: .regulation,
                          status: .draft, approval: nil,
                          title: LocalizedText(bg: "Тест"),
-                         steps: steps, measure: measure, rounds: rounds, sides: sides)
+                         steps: steps, section: .nervousSystem,
+                         measure: measure, rounds: rounds, sides: sides)
     }
 
     func testARegulationProtocolNeedsSteps() {
@@ -203,7 +204,7 @@ extension ClinicalProtocolTests {
         ClinicalProtocol(
             id: "test-exposure", version: 1, kind: .exposure, status: .draft,
             approval: nil, title: LocalizedText(bg: "Тест"), steps: steps,
-            recoveryProtocol: recovery)
+            section: .challenge, recoveryProtocol: recovery)
     }
 
     func testABreathingProtocolStillNeedsItsPlan() {

@@ -1,7 +1,9 @@
 # Практиките за личния билд
 
-Шестнайсет практики, написани по „Отвъд тревожността“ на психолог Даниел Троев. Никоя от
-тях не е одобрена от него и нито една не влиза в публично издание.
+Двайсет и седем практики. Шестнайсет са написани по „Отвъд тревожността“ на психолог
+Даниел Троев; единайсет — за секцията „Тревожност“, по рецензираната литература
+([ТРЕВОЖНОСТ.md](../../docs/ТРЕВОЖНОСТ.md)). Никоя не е одобрена и нито една не влиза в
+публично издание.
 
 ---
 
@@ -45,12 +47,25 @@ TestFlight, линк към някого. Човек, който ползва с
 
 ## Какво има вътре
 
-**Микропрактики за нервната система** — `shoulders-belly-release`, `body-scan-exhale`,
-`orienting-room`, `senses-grounding`, `palm-on-body`, `self-hug`, `humming`, `salamander`,
-`belly-breathing`, `nadi-shodhana`, `cold-water`.
+Всяка практика носи **секция**, по която се групира каталогът, и **колко трае**. Секцията
+е задължителна: файл без нея не се създава изобщо.
 
-**Подготовка на нагласата** — `normalizing-attitude`, `three-steps-support`,
-`metacognition-questions`, `safety-questions`.
+**`nervous-system` · Тялото** — `cold-water`, `shoulders-belly-release`, `orienting-room`,
+`senses-grounding`, `palm-on-body`, `self-hug`, `body-scan-exhale`, `belly-breathing`,
+`humming`, `salamander`, `nadi-shodhana`.
+
+**`worry` · Притеснението** — `worry-postponement`, `thought-not-command`,
+`detached-observation`, `worry-window`.
+
+**`attention` · Вниманието** — `three-breaths`, `breath-anchor`, `sounds-around`,
+`body-scan-slow`. **Всяка от тях носи `stopRule`** и това не е по желание: систематичен
+преглед дава около 8% обща честота на нежеланите събития при медитация, а най-честото от
+тях е самата тревожност. Практика от тази секция без правило за спиране не се създава.
+
+**`action` · Действието** — `one-small-step`, `what-matters`, `movement-dose`.
+
+**`mindset` · Нагласата** — `normalizing-attitude`, `three-steps-support`,
+`safety-questions`, `metacognition-questions`.
 
 **Степенувано предизвикване** — `graded-challenge`. Единственият експозиционен файл и
 най-рисковият в папката. Носи задължителен `recoveryProtocol`, защото схемата не го приема

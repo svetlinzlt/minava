@@ -1,5 +1,6 @@
 {
   "approval": null,
+  "estimatedMinutes": 3,
   "id": "belly-breathing",
   "kind": "regulation",
   "measure": "activation-0-10",
@@ -13,12 +14,19 @@
     }
   ],
   "schemaVersion": 1,
+  "section": "nervous-system",
   "status": "draft",
   "steps": [
     {
-      "minDuration": 60,
+      "minDuration": 15,
       "text": {
-        "bg": "Дишай в своето темпо. Коремът се повдига, гърдите стоят почти неподвижни."
+        "bg": "Дишай в своето темпо."
+      }
+    },
+    {
+      "minDuration": 45,
+      "text": {
+        "bg": "Коремът се повдига, гърдите стоят почти неподвижни."
       }
     },
     {

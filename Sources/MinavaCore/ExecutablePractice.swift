@@ -14,7 +14,14 @@ public struct ExecutablePractice: Equatable, Sendable {
     public let protocolID: String
     public let version: Int
     public let kind: ClinicalProtocol.Kind
+    /// Which group of the catalogue it appears under. Never nil for a practice that ran the
+    /// gate — `structuralDefect()` refuses a practice without one.
+    public let section: ClinicalProtocol.Section
     public let title: LocalizedText
+    /// Roughly how long it takes, shown next to the name.
+    public let estimatedMinutes: Int?
+    /// What to do if it makes things worse. Always present for `.attention`.
+    public let stopRule: LocalizedText?
     public let steps: [GroundingStep]
     /// Shown once, before the first round. Never repeated.
     public let preparation: [GroundingStep]
@@ -52,7 +59,11 @@ public struct ExecutablePractice: Equatable, Sendable {
         self.protocolID = file.id
         self.version = file.version
         self.kind = file.kind
+        // Safe: a practice without a section is a structural defect and was refused above.
+        self.section = file.section ?? .nervousSystem
         self.title = file.title
+        self.estimatedMinutes = file.estimatedMinutes
+        self.stopRule = file.stopRule
         self.steps = file.steps ?? []
         self.preparation = file.preparation ?? []
         self.rounds = file.rounds ?? 1

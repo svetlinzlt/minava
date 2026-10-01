@@ -29,6 +29,7 @@ final class PracticeSessionTests: XCTestCase {
             preparation: preparation.isEmpty
                 ? nil
                 : preparation.map { GroundingStep(text: LocalizedText(bg: $0)) },
+            section: kind == .exposure ? .challenge : .nervousSystem,
             measure: measure, rounds: rounds, sides: sides, recoveryProtocol: recovery)
 
         let practice = try! ExecutablePractice(file, build: .debug)
