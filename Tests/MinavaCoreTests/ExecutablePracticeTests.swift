@@ -191,8 +191,8 @@ final class ExecutablePracticeTests: XCTestCase {
     /// Правилото важи само там, където трябва: другите секции не го искат.
     func testOtherSectionsDoNotNeedAStopRule() {
         for section in ClinicalProtocol.Section.allCases where section != .attention {
-            let subject = file(section: section,
-                               recovery: section == .challenge ? "calm-down" : nil)
+            let subject = file(recovery: section == .challenge ? "calm-down" : nil,
+                               section: section)
             XCTAssertNil(subject.structuralDefect(), "\(section)")
         }
     }
