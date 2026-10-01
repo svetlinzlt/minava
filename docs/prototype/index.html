@@ -140,7 +140,7 @@
     font-weight: 300;
     /* Долната граница е 3.4rem = 54.4px ≈ 41pt: изискване И-41 е основната
        дума в паник режим да не пада под 40pt. */
-    font-size: clamp(3.4rem, 16vw, 4.2rem);
+    font-size: min(clamp(3.4rem, 16vw, 4.2rem), 9vh);
     letter-spacing: -0.02em;
     line-height: 1;
     margin: 0;
@@ -149,7 +149,7 @@
   .stage .count {
     font-weight: 300;
     font-variant-numeric: tabular-nums;
-    font-size: clamp(4.4rem, 21vw, 5.6rem);
+    font-size: min(clamp(4.4rem, 21vw, 5.6rem), 11vh);
     letter-spacing: -0.03em;
     line-height: 1;
     margin: 0.6rem 0 0;
@@ -166,7 +166,7 @@
   #pause .ask {
     flex: 1 1 auto; display: flex; align-items: center;
     font-family: ui-serif, Georgia, serif;
-    font-size: clamp(1.6rem, 7vw, 2.2rem);
+    font-size: min(clamp(1.6rem, 7vw, 2.2rem), 6vh);
     line-height: 1.3;
   }
 
@@ -174,10 +174,16 @@
   #ground { justify-content: flex-end; }
   #ground .step { flex: none; color: var(--quiet); font-size: 0.95rem;
                   letter-spacing: 0.06em; text-transform: uppercase; }
-  #ground .text {
-    flex: 1 1 auto; display: flex; align-items: center;
+  #ground .text, #practice .text {
+    flex: 1 1 auto; min-height: 0; overflow-y: auto;
+    display: flex; align-items: center;
     font-family: ui-serif, Georgia, serif;
-    font-size: clamp(1.8rem, 8vw, 2.6rem);
+    /* Таванът е в `vh`, а не само в `rem`. При най-едрия Dynamic Type `rem` носеше
+       текста до 95 px и най-дългата стъпка искаше 1670 px при около 580 налични —
+       бутонът „Продължи" излизаше извън екрана (И-42). Сега текстът пак расте с
+       системния размер, но спира на 6.5vh, а остатъкът се превърта, вместо да
+       избутва действието. Измерването е в docs/ОПТИМИЗАЦИЯ.md, точка 1. */
+    font-size: min(clamp(1.8rem, 8vw, 2.6rem), 6.5vh);
     line-height: 1.25;
   }
   #ground .hint { flex: none; color: var(--quiet); margin-bottom: 1rem; }
@@ -226,8 +232,8 @@
   #practices { overflow-y: auto; padding-top: 0.5rem; }
   #practices h2 { font-family: ui-serif, Georgia, serif; font-size: 1.5rem;
                   margin: 0.5rem 0 0.35rem; }
-  #practices .lead { color: var(--quiet); font-size: 0.9rem; line-height: 1.5;
-                     margin: 0 0 1rem; }
+  #practices .lead, #rate .lead { color: var(--quiet); font-size: 0.9rem;
+                                  line-height: 1.5; margin: 0 0 1rem; }
   .pick {
     display: flex; align-items: center; justify-content: space-between; gap: 1rem;
     width: 100%; min-height: 68px; padding: 0.9rem 1rem; margin-bottom: 0.6rem;
@@ -248,12 +254,6 @@
   #practice .step { color: var(--quiet); font-size: 0.95rem;
                     letter-spacing: 0.06em; text-transform: uppercase;
                     text-align: right; }
-  #practice .text {
-    flex: 1 1 auto; display: flex; align-items: center;
-    font-family: ui-serif, Georgia, serif;
-    font-size: clamp(1.8rem, 8vw, 2.6rem);
-    line-height: 1.25;
-  }
   /* Изходът стои горе вляво, както при дишането, и по същата причина. Тук обаче е
      от първия миг: упражнение между епизодите не е нещо, от което да те пазим. */
   #pleave {
@@ -296,6 +296,26 @@
     font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase;
   }
 
+  /* Чува се от VoiceOver, не се вижда на екрана. Стъпката се обявява заедно с
+     мястото си („Кръг 2 от 9"), без надписът да се повтаря визуално. */
+  .sr {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+  }
+
+  /* Секциите в списъка с упражнения. */
+  #practices h3 {
+    font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--quiet); font-weight: 500;
+    margin: 1.5rem 0 0.6rem;
+  }
+  #practices h3:first-of-type { margin-top: 0.5rem; }
+
+  /* Правилото за спиране. Стои под действието, тихо, но винаги видимо —
+     медитация без изход не се предлага. */
+  #pstop { flex: none; color: var(--quiet); font-size: 0.85rem; line-height: 1.45;
+           margin: 0 0 0.75rem; }
+
   /* Ограничаването на движението се спазва в кода, не със стил: точката спира да
      пълзи и се мести само при смяна на фаза. Информацията остава, движението — не. */
 </style>
@@ -316,8 +336,8 @@
 <section class="screen" id="breathe">
   <button id="leave" data-go="after">Стига</button>
   <div class="stage">
-    <p class="word" id="word">Вдишай</p>
-    <p class="count" id="count">4</p>
+    <p class="word" id="word" role="status" aria-live="assertive" aria-atomic="true">Вдишай</p>
+    <p class="count" id="count" aria-hidden="true">4</p>
     <svg id="curve" viewBox="0 0 340 78" preserveAspectRatio="none" aria-hidden="true">
       <path id="path" class="bed"/>
       <path id="pathdone" class="live"/>
@@ -341,8 +361,10 @@
 
 <!-- ЕКРАН 3 · заземяване -->
 <section class="screen" id="ground">
-  <div class="step" id="gstep">Стъпка 1 от 5</div>
-  <div class="text" id="gtext">Намери пет неща, които виждаш.</div>
+  <div class="step" id="gstep" aria-hidden="true">Стъпка 1 от 5</div>
+  <div class="text" id="gtext" role="status" aria-live="polite" aria-atomic="true">
+    <span class="sr" id="gstepsr"></span><span id="gtextbody">Намери пет неща, които виждаш.</span>
+  </div>
   <div class="hint">Няма нужда да ги казваш на глас. Само ги забележи.</div>
   <div class="actions"><button id="gnext">Продължи</button></div>
   <button class="help" data-go="crisis">Помощ</button>
@@ -437,16 +459,23 @@
 <section class="screen" id="practice">
   <div class="topbar">
     <button id="pleave">Спри</button>
-    <div class="step" id="pstep">Стъпка 1</div>
+    <div class="step" id="pstep" aria-hidden="true">Стъпка 1</div>
   </div>
-  <div class="text" id="ptext"></div>
-  <div class="actions"><button id="pnext">Продължи</button></div>
+  <div class="text" id="ptext" role="status" aria-live="polite" aria-atomic="true">
+    <span class="sr" id="pstepsr"></span><span id="ptextbody"></span>
+  </div>
+  <p id="pstop" style="display:none"></p>
+  <div class="actions">
+    <button class="plain" id="prepeat" style="display:none">Повтори на глас</button>
+    <button id="pnext">Продължи</button>
+  </div>
   <button class="help" data-go="crisis">Помощ</button>
 </section>
 
 <!-- ЕКРАН 9 · скалата -->
 <section class="screen" id="rate">
   <div class="ask" id="rask">Колко силно е сега?</div>
+  <p id="rwas" class="lead" style="display:none"></p>
   <div class="grid" id="rgrid"></div>
   <div class="ends"><span>0 · спокойно</span><span>10 · най-силното</span></div>
   <div class="actions"><button class="plain" id="rskip">Прескочи</button></div>
@@ -697,10 +726,14 @@
 
   document.addEventListener("visibilitychange", function () {
     if (document.hidden) { return; }
-    // Упражнението не се пренавива — то чака човека, а не обратното. Само надписът
-    // на бутона се пресмята наново, защото докато страницата е била скрита,
-    // таймерът е спрял и секундите на екрана са остарели.
-    if (el("practice").classList.contains("on")) { refreshGate(); }
+    // Прекъсване по средата на упражнение — обаждане, сменено приложение, заспал
+    // екран. Връщаме се в началото на ТЕКУЩИЯ кръг, както прави и дишането: да се
+    // озовеш на седмия от девет кръга, без да помниш как си стигнал дотам, е
+    // по-лошо от няколко повторени вдишвания. Оценката не се пипа.
+    if (el("practice").classList.contains("on")) {
+      rewindToRoundStart();
+      refreshGate();
+    }
     if (!ticker) { return; }
     rewindToCycleStart();
     tick();
@@ -719,8 +752,12 @@
   });
 
   function renderGround() {
-    el("gstep").textContent = "Стъпка " + (groundStep + 1) + " от " + GROUNDING.length;
-    el("gtext").textContent = GROUNDING[groundStep];
+    var label = "Стъпка " + (groundStep + 1) + " от " + GROUNDING.length;
+    el("gstep").textContent = label;
+    // Надписът се чува веднъж, заедно с текста, вместо да е втора област, която
+    // говори едновременно с първата.
+    el("gstepsr").textContent = label + ". ";
+    el("gtextbody").textContent = GROUNDING[groundStep];
     speak(GROUNDING[groundStep]);
     el("gnext").textContent = (groundStep === GROUNDING.length - 1) ? "Готово" : "Продължи";
   }
@@ -823,18 +860,37 @@
     el("lastchange").textContent = r.before + " → " + r.after + (old ? " · отпреди време" : "");
   }
 
+  // Заглавията на секциите са интерфейс, не клинично съдържание, затова стоят тук,
+  // а не в clinical/. Редът идва от подредбата на самия каталог.
+  var SECTION_TITLE = {
+    "nervous-system": "Тялото",
+    "worry": "Притеснението",
+    "attention": "Вниманието",
+    "action": "Действието",
+    "mindset": "Нагласата"
+  };
+
   function renderList() {
-    var list = el("picklist");
+    var list = el("picklist"), seen = {};
     list.innerHTML = "";
+
     CATALOGUE.forEach(function (p) {
+      if (!seen[p.section]) {
+        seen[p.section] = true;
+        var h = document.createElement("h3");
+        h.textContent = SECTION_TITLE[p.section] || p.section;
+        list.appendChild(h);
+      }
+
       var b = document.createElement("button");
       b.className = "pick";
       var name = document.createElement("span");
       name.textContent = p.title;
       var meta = document.createElement("span");
       meta.className = "meta";
-      meta.textContent = (p.rounds && p.rounds > 1) ? (p.rounds + " кръга")
-                       : (p.sides ? "две страни" : "");
+      // Колко трае е по-полезно от колко кръга: разликата между опит и отказ често
+      // е да знаеш, че са три минути, а не двайсет.
+      meta.textContent = p.minutes ? (p.minutes + " мин") : "";
       b.appendChild(name);
       b.appendChild(meta);
       b.addEventListener("click", function () { startPractice(p); });
@@ -854,9 +910,16 @@
 
   function askRating(isBefore) {
     P.asking = isBefore ? "before" : "after";
+    var last = lastReading();
+    // Една стойност, за една практика, без история и без график. Ако последната
+    // запазена промяна е от същото упражнение, тя се показва — иначе въпросът се
+    // задава и не води доникъде, което учи човек, че въпросите тук са украса.
+    var same = isBefore && last && last.id === P.practice.id;
     el("rask").textContent = isBefore
       ? "Колко силно е сега?"
       : "А сега колко силно е?";
+    el("rwas").textContent = same ? ("Миналия път: " + last.before + " → " + last.after) : "";
+    el("rwas").style.display = same ? "" : "none";
     // „Прескочи" е истинска опция. Измерване, което се иска, престава да е измерване
     // и става условие за упражнението.
     el("rskip").textContent = isBefore ? "Без оценка" : "Прескочи";
@@ -877,9 +940,18 @@
     }
     P.index = index;
     P.stepAt = performance.now();
-    var step = P.seq[index];
-    el("pstep").textContent = stepLabel(step);
-    el("ptext").textContent = step.bg;
+    var step = P.seq[index], label = stepLabel(step);
+    el("pstep").textContent = label;
+    el("pstepsr").textContent = label + ". ";
+    el("ptextbody").textContent = step.bg;
+
+    // Правилото за спиране стои през цялото упражнение, не само в началото.
+    // Медитацията има нежелани ефекти и най-честият от тях е самата тревожност —
+    // виж docs/ТРЕВОЖНОСТ.md.
+    el("pstop").textContent = P.practice.stopRule || "";
+    el("pstop").style.display = P.practice.stopRule ? "" : "none";
+
+    el("prepeat").style.display = voiceOn ? "" : "none";
     speak(step.bg);
     show("practice");
     refreshGate();
@@ -897,15 +969,30 @@
       var left = step.min ? Math.ceil(step.min - (performance.now() - P.stepAt) / 1000) : 0;
       if (left > 0) {
         el("pnext").textContent = "още " + left + " сек";
+        // Видимият надпис се сменя всяка секунда; за VoiceOver това би било
+        // бъбрене. Затова името на бутона е цяло изречение и се задава тук.
+        el("pnext").setAttribute("aria-label", "Изчакай още " + left + " секунди");
         el("pnext").classList.add("waiting");
       } else {
         el("pnext").textContent = label;
+        el("pnext").setAttribute("aria-label", label);
         el("pnext").classList.remove("waiting");
         clearInterval(P.gate);
       }
     }
     paint();
     if (step.min) { P.gate = setInterval(paint, 250); }
+  }
+
+  // Първата стъпка на кръга, в който сме. Подготовката (кръг 0) не се повтаря.
+  function rewindToRoundStart() {
+    var step = P.seq[P.index];
+    if (!step || step.round === 0) { return; }
+    var i = P.index;
+    while (i > 0 && P.seq[i - 1].round === step.round && P.seq[i - 1].side === step.side) {
+      i -= 1;
+    }
+    if (i !== P.index) { runStep(i); } else { P.stepAt = performance.now(); refreshGate(); }
   }
 
   function canAdvance() {
@@ -945,6 +1032,11 @@
     runStep(P.index + 1);
   });
   el("pleave").addEventListener("click", stopPractice);
+  // На екран, който иска затворени очи, „не чух" не бива да значи „излез и влез наново".
+  el("prepeat").addEventListener("click", function () {
+    var step = P.seq[P.index];
+    if (step) { speak(step.bg); }
+  });
   el("rskip").addEventListener("click", function () {
     if (P.asking === "before") { runStep(0); } else { finishPractice(); }
   });

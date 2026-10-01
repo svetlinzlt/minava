@@ -70,9 +70,11 @@ final class PersonalPracticesTests: XCTestCase {
 
             for step in (file.preparation ?? []) + (file.steps ?? []) {
                 XCTAssertFalse(step.text.bg.isEmpty, name)
-                // Read from a phone, sometimes with shaking hands. A step that needs three
-                // lines is a step that gets skipped.
-                XCTAssertLessThanOrEqual(step.text.bg.count, 100,
+                // Измерено, не избрано: при най-едрия Dynamic Type текстът на стъпката
+                // се изписва с около 95 px, а 95-знакова стъпка искаше 1670 px при
+                // около 580 налични и изхвърляше бутона извън екрана. Виж
+                // docs/ОПТИМИЗАЦИЯ.md, точка 1.
+                XCTAssertLessThanOrEqual(step.text.bg.count, 70,
                                          "\(name): стъпката е твърде дълга за екран")
             }
         }
@@ -127,6 +129,50 @@ final class PersonalPracticesTests: XCTestCase {
 
         XCTAssertEqual(directory.visible(build: .personal).map(\.number), ["112"])
         XCTAssertEqual(directory.visible(build: .debug).map(\.id), ["line"])
+    }
+
+    // MARK: - Каталогът
+
+    /// Каталогът мина двайсет и пет практики. Плосък списък спира да работи и затова
+    /// секцията е задължителна, а не препоръчителна.
+    func testEveryPracticeHasASection() throws {
+        for (name, file) in try documents() {
+            XCTAssertNotNil(file.section, "\(name) няма секция")
+        }
+    }
+
+    /// Правилото от docs/ТРЕВОЖНОСТ.md върху истинските файлове: систематичен преглед
+    /// дава около 8% обща честота на нежеланите събития при медитация, а най-честото от
+    /// тях е самата тревожност.
+    func testEveryAttentionPracticeCarriesAStopRule() throws {
+        var attention = 0
+        for (name, file) in try documents() where file.section == .attention {
+            attention += 1
+            let rule = try XCTUnwrap(file.stopRule, "\(name) е медитация без изход")
+            XCTAssertFalse(rule.bg.isEmpty, name)
+        }
+        XCTAssertGreaterThan(attention, 0, "секцията за внимание не бива да е празна")
+    }
+
+    func testEveryPracticeSaysHowLongItTakes() throws {
+        for (name, file) in try documents() {
+            let minutes = try XCTUnwrap(file.estimatedMinutes, name)
+            XCTAssertGreaterThan(minutes, 0, name)
+        }
+    }
+
+    /// Групите излизат в реда на `Section`, а празна секция не се показва изобщо:
+    /// заглавие без нищо под него казва на човек, че нещо липсва.
+    func testGroupsComeOutInSectionOrderAndNoneIsEmpty() {
+        let library = ProtocolLibrary.load(from: folder, build: .personal)
+        let order = library.groups.map(\.section)
+
+        XCTAssertFalse(order.isEmpty)
+        XCTAssertEqual(order, ClinicalProtocol.Section.allCases.filter { order.contains($0) },
+                       "редът на секциите трябва да следва реда в Section")
+        XCTAssertTrue(library.groups.allSatisfy { !$0.practices.isEmpty })
+        XCTAssertEqual(library.groups.reduce(0) { $0 + $1.practices.count },
+                       library.practices.count)
     }
 
     func testAPersonalBuildAllowsUnapprovedContentButReleaseDoesNot() {

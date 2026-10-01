@@ -27,6 +27,27 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
         case right, left
     }
 
+    /// Which group of the catalogue a practice belongs to.
+    ///
+    /// The list passed fifteen practices and a flat list stopped working — nobody reads
+    /// thirty lines to pick one. The order of the cases is the order on screen, and it goes
+    /// from the shortest and most physical to the most reflective.
+    public enum Section: String, Codable, Sendable, CaseIterable {
+        /// Short practices for the nervous system: cold water, shoulders, orienting. First
+        /// because this is what a person reaches for when they already feel bad.
+        case nervousSystem = "nervous-system"
+        /// What you do with a worry. The centre of the anxiety part — see docs/ТРЕВОЖНОСТ.md.
+        case worry
+        /// Attention practices, meditation among them. Always carries a stop rule.
+        case attention
+        /// Doing the thing anyway: one small step, movement as a dose.
+        case action
+        /// Preparing the attitude: what you say to yourself, before anything happens.
+        case mindset
+        /// Graded challenge. Exposure, and the only section that is not self-evidently safe.
+        case challenge
+    }
+
     public enum Status: String, Codable, Sendable {
         case draft, review, approved
     }
@@ -46,6 +67,18 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
     /// Getting into position is not part of the exercise. A practice with nine rounds must
     /// not tell someone nine times where to put their hands.
     public let preparation: [GroundingStep]?
+    /// Which group of the catalogue this practice belongs to.
+    public let section: Section?
+    /// Roughly how long it takes, shown next to the name. The difference between trying and
+    /// skipping is often knowing it is three minutes and not twenty.
+    public let estimatedMinutes: Int?
+    /// What to do if the practice makes things worse.
+    ///
+    /// Required for `.attention`. A systematic review puts adverse events in meditation at
+    /// roughly 8% overall, and the single most common one reported is anxiety itself. An app
+    /// that hands meditation to an anxious person and says nothing about that is careless —
+    /// so the file is refused rather than run.
+    public let stopRule: LocalizedText?
     /// Present when the protocol asks for a rating before and after.
     public let measure: Measure?
     /// How many times the whole sequence of `steps` repeats. A round is one pass through
@@ -70,6 +103,17 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
         return approval.appliesToVersion == version
     }
 
+    /// Whether this file is run by the practice engine rather than the breathing one.
+    ///
+    /// The same three kinds that `ExecutablePractice` accepts, named once so the rule about
+    /// which files need a section cannot drift away from the rule about which files run.
+    public var isPractice: Bool {
+        switch kind {
+        case .grounding, .regulation, .exposure: return true
+        case .breathing, .screening, .crisisPath: return false
+        }
+    }
+
     /// Reads one protocol file. Kept here so every caller decodes it the same way.
     public static func decoded(from data: Data) throws -> ClinicalProtocol {
         try JSONDecoder().decode(ClinicalProtocol.self, from: data)
@@ -87,6 +131,9 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
         breathing: BreathingPlan? = nil,
         steps: [GroundingStep]? = nil,
         preparation: [GroundingStep]? = nil,
+        section: Section? = nil,
+        estimatedMinutes: Int? = nil,
+        stopRule: LocalizedText? = nil,
         measure: Measure? = nil,
         rounds: Int? = nil,
         sides: [Side]? = nil,
@@ -104,6 +151,9 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
         self.breathing = breathing
         self.steps = steps
         self.preparation = preparation
+        self.section = section
+        self.estimatedMinutes = estimatedMinutes
+        self.stopRule = stopRule
         self.measure = measure
         self.rounds = rounds
         self.sides = sides
@@ -127,6 +177,9 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
         default:
             break
         }
+        if isPractice && section == nil { return .missingSection }
+        // Правилото от docs/ТРЕВОЖНОСТ.md, направено невъзможно за забравяне.
+        if section == .attention && stopRule == nil { return .attentionWithoutStopRule }
         if let rounds, rounds < 1 { return .roundsOutOfBounds(rounds) }
         if let sides, Set(sides).count != sides.count { return .repeatedSide }
         return nil
@@ -136,6 +189,10 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
 public enum StructuralDefect: Error, Equatable, Sendable {
     case missingBreathingPlan
     case missingSteps
+    /// A practice with no place in the catalogue would simply not appear on any screen.
+    case missingSection
+    /// The rule from docs/ТРЕВОЖНОСТ.md: meditation without a way out is not offered.
+    case attentionWithoutStopRule
     /// The rule from docs/ТРЕНИРАНЕ.md, made impossible to forget.
     case exposureWithoutRecovery
     case roundsOutOfBounds(Int)
