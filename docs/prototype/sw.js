@@ -3,7 +3,7 @@
 // Но кеш, който винаги печели, значи че нова версия никога не стига до телефона.
 // Затова: за самата страница първо се пробва мрежата и се пада към кеша; за
 // останалите файлове — обратното. Офлайн работи и в двата случая.
-var CACHE = "minava-prototype-3";
+var CACHE = "minava-prototype-4";
 var FILES = ["./", "./index.html", "./practices.js", "./app.webmanifest",
              "./icon-180.png"];
 
@@ -13,11 +13,23 @@ self.addEventListener("install", function (event) {
 });
 
 self.addEventListener("activate", function (event) {
-  event.waitUntil(caches.keys().then(function (keys) {
-    return Promise.all(keys.filter(function (k) { return k !== CACHE; })
-                           .map(function (k) { return caches.delete(k); }));
-  }));
-  self.clients.claim();
+  event.waitUntil(
+    caches.keys().then(function (keys) {
+      return Promise.all(keys.filter(function (k) { return k !== CACHE; })
+                             .map(function (k) { return caches.delete(k); }));
+    }).then(function () {
+      return self.clients.claim();
+    }).then(function () {
+      return self.clients.matchAll({ type: "window" });
+    }).then(function (clients) {
+      // Новата версия е готова, но страницата пред човека е старата. Казваме ѝ и тя
+      // решава кога да се презареди — не насред упражнение. Без това съобщение
+      // обновяването стига до телефона и стои невидимо до следващото отваряне.
+      clients.forEach(function (client) {
+        client.postMessage({ type: "minava-updated", cache: CACHE });
+      });
+    })
+  );
 });
 
 self.addEventListener("fetch", function (event) {

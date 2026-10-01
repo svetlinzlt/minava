@@ -22,6 +22,7 @@ from __future__ import print_function
 import io
 import json
 import os
+import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -142,9 +143,36 @@ def rendered(practices):
     return HEADER + body + u";\n"
 
 
+def versions():
+    """Номерът на версията в страницата и името на кеша в service worker-а.
+
+    Двете трябва да вървят заедно. Разминат ли се, екранът ще показва версия, която
+    телефонът няма, или кешът ще се смени, без човек да може да го види — и в двата
+    случая въпросът „обнови ли се" остава без отговор.
+    """
+    page = io.open(os.path.join(ROOT, "docs", "prototype", "index.html"),
+                   encoding="utf-8").read()
+    worker = io.open(os.path.join(ROOT, "docs", "prototype", "sw.js"),
+                     encoding="utf-8").read()
+
+    in_page = re.search(r"var BUILD = (\d+);", page)
+    in_worker = re.search(r'var CACHE = "minava-prototype-(\d+)";', worker)
+    return (int(in_page.group(1)) if in_page else None,
+            int(in_worker.group(1)) if in_worker else None)
+
+
 def main():
     check = "--check" in sys.argv
     practices, skipped = collect()
+
+    page_build, worker_build = versions()
+    if page_build is None or worker_build is None:
+        print("ГРЕШКА не намирам версията в index.html или в sw.js")
+        return 1
+    if page_build != worker_build:
+        print("ГРЕШКА версията в index.html е %d, а кешът в sw.js е %d — вдигат се "
+              "заедно" % (page_build, worker_build))
+        return 1
     text = rendered(practices)
 
     for name, reason in skipped:

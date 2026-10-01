@@ -425,6 +425,12 @@
      избира.</p>
   <div class="row"><span>Секунди до първото вдишване</span><span id="measured" class="muted">—</span></div>
   <div class="row"><span>Последна промяна в скалата</span><span id="lastchange" class="muted">—</span></div>
+  <div class="row"><span>Версия</span><span id="build" class="muted">—</span></div>
+  <div class="row"><span>Нова версия</span>
+    <button class="quiet" id="checkupdate" style="width:auto;min-width:120px">провери</button></div>
+  <p class="muted">Телефонът не винаги тегли новата версия сам — iOS държи приложението
+     заспало и при връщане просто го събужда. Редът горе казва коя версия е пред теб, а
+     бутонът пита наново и презарежда, ако има по-нова.</p>
   <p class="muted">Пази се <strong>само последната стойност</strong> — не график, не дни
      подред, не брой упражнения. Серия при тревожен човек е вреда, а не насърчение.
      Стойността стои на този телефон и не отива никъде.</p>
@@ -1063,9 +1069,46 @@
     window.speechSynthesis.onvoiceschanged = refreshVoiceRow;
   }
 
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js").catch(function () {});
+  // Версията на прототипа. Вдига се заедно с името на кеша в sw.js, а
+  // tools/sync_prototype.py --check проваля билда, ако двете се разминат — иначе
+  // ще обещава обновяване, което не е стигнало до телефона.
+  var BUILD = 4;
+
+  el("build").textContent = "прототип " + BUILD + " · " +
+                            CATALOGUE.length + " упражнения";
+
+  // Презареждане само когато е безопасно. Насред дишане или упражнение новата
+  // версия чака — обновяване, което прекъсва упражнение, е по-лошо от старо.
+  function safeToReload() {
+    return el("enter").classList.contains("on") ||
+           el("about").classList.contains("on") ||
+           el("practices").classList.contains("on");
   }
+
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").then(function (reg) {
+      // Питаме при всяко отваряне. Без това Safari проверява рядко и по свой график.
+      try { reg.update(); } catch (e) {}
+    }).catch(function () {});
+
+    navigator.serviceWorker.addEventListener("message", function (event) {
+      if (!event.data || event.data.type !== "minava-updated") { return; }
+      if (safeToReload()) { location.reload(); }
+    });
+  }
+
+  el("checkupdate").addEventListener("click", function () {
+    var button = el("checkupdate");
+    button.textContent = "проверявам";
+    if (!("serviceWorker" in navigator)) { location.reload(); return; }
+    navigator.serviceWorker.getRegistration().then(function (reg) {
+      return reg ? reg.update() : null;
+    }).then(function () {
+      // Презареждаме дори когато няма нова версия: това е и начинът да се види, че
+      // наистина няма, вместо да се гадае.
+      location.reload();
+    }).catch(function () { location.reload(); });
+  });
 })();
 </script>
 </body>
