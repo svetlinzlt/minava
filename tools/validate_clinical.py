@@ -27,6 +27,7 @@ SCHEMA_PATH = os.path.join(ROOT, "clinical", "schema", "protocol.schema.json")
 PROTOCOL_DIR = os.path.join(ROOT, "clinical", "protocols")
 EXAMPLE_DIR = os.path.join(ROOT, "clinical", "examples")
 PERSONAL_DIR = os.path.join(ROOT, "clinical", "personal")
+TRIGGERS_PATH = os.path.join(ROOT, "content", "спусъци.json")
 
 MAX_TOTAL_SECONDS = 20 * 60
 PHASE_ORDER = ["inhale", "holdIn", "exhale", "holdOut"]
@@ -128,6 +129,20 @@ def check_number(schema, value, path, errors):
 
 # --- проверките, които схемата не може да изрази ----------------------------
 
+def known_situations():
+    """Ситуациите са готов списък и това е целият смисъл.
+
+    Стълбата иска човек да избере ситуация, а не да я напише — така нищо, написано от
+    него, не влиза в хранилището. Ако файл сочи към ситуация, която я няма в списъка,
+    екранът ще покаже стълба без име.
+    """
+    try:
+        data = json.load(io.open(TRIGGERS_PATH, encoding="utf-8"))
+    except (IOError, ValueError):
+        return set()
+    return set(t.get("id") for t in data.get("triggers", []) if t.get("id"))
+
+
 def check_consistency(doc, errors, warnings):
     kind = doc.get("kind")
     if kind == "breathing" and "breathing" not in doc:
@@ -161,6 +176,17 @@ def check_consistency(doc, errors, warnings):
             errors.append("стъпка %d е %d знака, таванът е %d — при най-едрия Dynamic Type "
                           "по-дълга стъпка изхвърля бутона извън екрана"
                           % (index + 1, len(text), STEP_LIMIT))
+
+    situation = doc.get("situation")
+    if situation:
+        if doc.get("kind") != "exposure":
+            errors.append("situation има смисъл само при експозиция — стълбата е "
+                          "степенувано изправяне срещу една ситуация")
+        known = known_situations()
+        if known and situation not in known:
+            errors.append("situation %r я няма в content/спусъци.json" % situation)
+        if len(steps) < 2:
+            errors.append("стълба с по-малко от две стъпала не е стълба")
 
     sides = doc.get("sides")
     if isinstance(sides, list) and len(set(sides)) != len(sides):

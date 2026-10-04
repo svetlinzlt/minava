@@ -52,17 +52,20 @@ public struct SettingsService: Sendable {
     private let preferences: PreferencesStoring
     private let catalogue: TriggerCatalogue
     private let activation: ActivationStoring?
+    private let ladder: LadderStoring?
 
     public init(
         store: EpisodeStoring,
         preferences: PreferencesStoring,
         catalogue: TriggerCatalogue = TriggerCatalogue(triggers: []),
-        activation: ActivationStoring? = nil
+        activation: ActivationStoring? = nil,
+        ladder: LadderStoring? = nil
     ) {
         self.store = store
         self.preferences = preferences
         self.catalogue = catalogue
         self.activation = activation
+        self.ladder = ladder
     }
 
     public var current: Preferences { preferences.load() }
@@ -102,6 +105,20 @@ public struct SettingsService: Sendable {
     // MARK: - Скалата
 
     /// The single reading, if one has been taken. Never a list.
+    /// Where the person is on their one ladder, if they have started one.
+    public func currentLadder() throws -> LadderProgress? {
+        try ladder?.current()
+    }
+
+    /// Moves the ladder. Starting a different one replaces the old progress — there is no
+    /// second slot, and that is deliberate.
+    public func recordLadder(protocolID: String, rung: Int, rungCount: Int,
+                             now: Date = Date()) throws {
+        try ladder?.record(LadderProgress(protocolID: protocolID, rung: rung,
+                                          updatedAt: now),
+                           rungCount: rungCount)
+    }
+
     public func latestActivation() throws -> ActivationReading? {
         try activation?.latest()
     }
@@ -142,6 +159,8 @@ public struct SettingsService: Sendable {
     /// The result is passed on exactly as it comes: `.remotePending` must be shown as
     /// "the copy in iCloud is waiting for a network", never rounded up to done.
     public func deleteEverything() throws -> DeletionOutcome {
+        // The ladder goes with it. "Everything" has to mean everything, or
+        try ladder?.clear()
         // The single activation reading goes too. "Everything" has to mean everything, or
         // the word is a lie on a screen someone is trusting.
         try activation?.clear()

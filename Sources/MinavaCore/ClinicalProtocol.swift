@@ -69,6 +69,12 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
     public let preparation: [GroundingStep]?
     /// Which group of the catalogue this practice belongs to.
     public let section: Section?
+    /// A situation from `content/спусъци.json`, present on a ladder.
+    ///
+    /// The rungs are the `steps`, ordered from the easiest to the hardest. The situations
+    /// are a fixed list on purpose: a person picks one rather than writing it, so nothing
+    /// anybody typed is ever stored. See docs/КОНКУРЕНТИ.md, candidate А.
+    public let situation: String?
     /// Roughly how long it takes, shown next to the name. The difference between trying and
     /// skipping is often knowing it is three minutes and not twenty.
     public let estimatedMinutes: Int?
@@ -103,6 +109,10 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
         return approval.appliesToVersion == version
     }
 
+    /// Whether this file is a ladder: an exposure protocol tied to one named situation,
+    /// whose steps are rungs from the easiest to the hardest.
+    public var isLadder: Bool { kind == .exposure && situation != nil }
+
     /// Whether this file is run by the practice engine rather than the breathing one.
     ///
     /// The same three kinds that `ExecutablePractice` accepts, named once so the rule about
@@ -132,6 +142,7 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
         steps: [GroundingStep]? = nil,
         preparation: [GroundingStep]? = nil,
         section: Section? = nil,
+        situation: String? = nil,
         estimatedMinutes: Int? = nil,
         stopRule: LocalizedText? = nil,
         measure: Measure? = nil,
@@ -152,6 +163,7 @@ public struct ClinicalProtocol: Codable, Equatable, Sendable {
         self.steps = steps
         self.preparation = preparation
         self.section = section
+        self.situation = situation
         self.estimatedMinutes = estimatedMinutes
         self.stopRule = stopRule
         self.measure = measure

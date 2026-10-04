@@ -267,6 +267,11 @@
         }
       }
     },
+    "situation": {
+      "description": "Identifier of a situation from content/спусъци.json. Present on a ladder: the rungs are the steps, ordered from the easiest to the hardest. The situations are a fixed list on purpose — a person picks one rather than writing it, so nothing anybody typed is ever stored.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{2,48}$"
+    },
     "section": {
       "description": "Which group of the catalogue this practice belongs to. The list passed fifteen practices and a flat list stops working: a person does not read thirty lines to choose one. Required for grounding, regulation and exposure.",
       "type": "string",

@@ -175,6 +175,31 @@ final class PersonalPracticesTests: XCTestCase {
                        library.practices.count)
     }
 
+    // MARK: - Стълбите
+
+    /// Ситуациите са готов списък и това е целият смисъл: човек избира, не пише, и нищо
+    /// написано от него не влиза в хранилището.
+    func testEveryLadderPointsAtAKnownSituation() throws {
+        let data = try Fixtures.data(at: "content/спусъци.json")
+        let object = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        let triggers = (object?["triggers"] as? [[String: Any]]) ?? []
+        let known = Set(triggers.compactMap { $0["id"] as? String })
+        XCTAssertFalse(known.isEmpty)
+
+        var ladders = 0
+        for (name, file) in try documents() where file.situation != nil {
+            ladders += 1
+            let situation = try XCTUnwrap(file.situation, name)
+            XCTAssertTrue(known.contains(situation),
+                          "\(name) сочи към ситуация \(situation), каквато няма в списъка")
+            XCTAssertEqual(file.kind, .exposure, "\(name): стълба без експозиция")
+            XCTAssertTrue(file.isLadder, name)
+            XCTAssertGreaterThanOrEqual((file.steps ?? []).count, 2,
+                                        "\(name): стълба с едно стъпало не е стълба")
+        }
+        XCTAssertGreaterThan(ladders, 0, "очаква се поне една стълба")
+    }
+
     func testAPersonalBuildAllowsUnapprovedContentButReleaseDoesNot() {
         XCTAssertTrue(BuildKind.personal.allowsUnapprovedContent)
         XCTAssertTrue(BuildKind.debug.allowsUnapprovedContent)
