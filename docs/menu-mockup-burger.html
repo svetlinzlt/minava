@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Минава · бургер меню и две алтернативи</title>
+<style>
+  :root {
+    --air:   #E9EFE7;
+    --paper: #FCFDFB;
+    --pine:  #17241C;
+    --alive: #1F7342;
+    --quiet: #6B7A70;
+    --line:  #D3DED0;
+    --warm:  #B4641E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --air:   #0E1512; --paper: #131C18; --pine: #E4EDE6;
+      --alive: #4FA97A; --quiet: #8FA096; --line: #26332C; --warm: #D08A45;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 2rem 1rem 4rem;
+    background: var(--air); color: var(--pine);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    line-height: 1.5;
+  }
+  .page { max-width: 1240px; margin: 0 auto; }
+  h1 { font-family: ui-serif, Georgia, serif; font-size: clamp(1.8rem, 5vw, 2.4rem);
+       margin: 0 0 0.5rem; }
+  .intro { color: var(--quiet); max-width: 64ch; margin: 0 0 1.5rem; }
+  .intro strong { color: var(--pine); }
+
+  .caveat {
+    border-left: 3px solid var(--warm); padding: 0.1rem 0 0.1rem 1rem;
+    margin: 0 0 2.5rem; max-width: 64ch;
+  }
+  .caveat p { margin: 0.7rem 0; }
+  .caveat strong { color: var(--warm); }
+
+  .row { display: flex; flex-wrap: wrap; gap: 2rem; align-items: flex-start; }
+  .option { flex: 1 1 330px; min-width: 310px; }
+  .option > h2 { font-family: ui-serif, Georgia, serif; font-size: 1.3rem; margin: 0 0 0.2rem; }
+  .option > .tag { color: var(--quiet); font-size: 0.85rem; margin: 0 0 1rem; }
+  .verdict { margin: 1rem 0 0; font-size: 0.9rem; line-height: 1.6; }
+  .verdict b { color: var(--alive); }
+  .verdict .against { color: var(--quiet); display: block; margin-top: 0.4rem; }
+
+  .phone {
+    position: relative;
+    width: 100%; max-width: 340px; aspect-ratio: 375 / 760;
+    border: 1px solid var(--line); border-radius: 28px; background: var(--air);
+    overflow: hidden; display: flex; flex-direction: column;
+  }
+  .inner { padding: 1.1rem 1rem; display: flex; flex-direction: column; height: 100%; }
+  .marker { flex: none; text-align: center; font-size: 0.6rem; letter-spacing: 0.08em;
+            text-transform: uppercase; color: var(--quiet); margin-bottom: 0.7rem; }
+  .title { font-family: ui-serif, Georgia, serif; font-size: 1.3rem; margin: 0 0 0.15rem; }
+  .sub { color: var(--quiet); font-size: 0.76rem; margin: 0 0 0.8rem; line-height: 1.45; }
+  .scroll { flex: 1 1 auto; overflow: hidden; }
+
+  .pick {
+    display: flex; align-items: center; justify-content: space-between; gap: 0.8rem;
+    min-height: 52px; padding: 0.6rem 0.85rem; margin-bottom: 0.45rem;
+    border: 1px solid var(--line); border-radius: 12px; background: var(--paper);
+    font-size: 0.9rem;
+  }
+  .pick .mins { color: var(--quiet); font-size: 0.72rem; }
+
+  /* --- бургерът --- */
+  .topbar { flex: none; display: flex; align-items: center; gap: 0.7rem;
+            margin-bottom: 0.6rem; }
+  .burger { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 9px;
+            background: var(--paper); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; gap: 4px; flex: none; }
+  .burger i { display: block; width: 15px; height: 1.5px; background: var(--pine); }
+  .topbar .where { font-family: ui-serif, Georgia, serif; font-size: 1.15rem; }
+
+  .reach {
+    position: absolute; left: 0; right: 0; top: 0; height: 24%;
+    background: repeating-linear-gradient(135deg,
+      transparent 0 8px, rgba(180,100,30,0.07) 8px 16px);
+    border-bottom: 1px dashed rgba(180,100,30,0.4);
+    pointer-events: none;
+  }
+  .reach span {
+    position: absolute; right: 10px; top: 44%; font-size: 0.55rem;
+    letter-spacing: 0.05em; text-transform: uppercase; color: var(--warm);
+  }
+
+  .drawer {
+    position: absolute; inset: 0; background: rgba(23,36,28,0.45);
+    display: flex;
+  }
+  .drawer .panel {
+    width: 76%; background: var(--paper); height: 100%;
+    padding: 1.1rem 0.9rem; border-right: 1px solid var(--line);
+  }
+  .drawer .panel h3 { font-family: ui-serif, Georgia, serif; font-size: 1.05rem;
+                      margin: 1.6rem 0 0.8rem; }
+  .drawer .item { display: flex; justify-content: space-between; align-items: center;
+                  min-height: 44px; font-size: 0.9rem;
+                  border-bottom: 1px solid var(--line); }
+  .drawer .item:last-child { border-bottom: none; }
+  .drawer .item.on { color: var(--alive); font-weight: 600; }
+  .drawer .item .n { color: var(--quiet); font-size: 0.72rem; }
+
+  /* --- таб бар --- */
+  .tabbar {
+    flex: none; display: flex; gap: 0.15rem; border-top: 1px solid var(--line);
+    padding-top: 0.5rem; margin-top: 0.5rem;
+  }
+  .tab { flex: 1 1 0; text-align: center; font-size: 0.6rem; color: var(--quiet);
+         line-height: 1.25; padding: 0.3rem 0.1rem; }
+  .tab .dot { display: block; width: 20px; height: 20px; margin: 0 auto 0.25rem;
+              border-radius: 7px; border: 1.5px solid var(--line); }
+  .tab.on { color: var(--alive); }
+  .tab.on .dot { border-color: var(--alive); background: rgba(31,115,66,0.12); }
+
+  /* --- ленти --- */
+  .chips { flex: none; display: flex; gap: 0.35rem; margin-bottom: 0.7rem;
+           overflow: hidden; }
+  .chip { flex: none; padding: 0.35rem 0.7rem; border-radius: 999px;
+          border: 1px solid var(--line); background: var(--paper);
+          font-size: 0.76rem; color: var(--quiet); white-space: nowrap; }
+  .chip.on { border-color: var(--alive); color: var(--alive); background: rgba(31,115,66,0.08); }
+
+  .note { border-left: 2px solid var(--line); padding-left: 1rem; margin: 2.5rem 0 0;
+          color: var(--quiet); max-width: 72ch; font-size: 0.92rem; }
+  .note strong { color: var(--pine); }
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>Бургер меню, и трите неща, които решават същото</h1>
+
+<p class="intro">И четирите показват <strong>един и същ втори екран</strong> — вариант А, който
+избра. Разликата е само как се минава от един вид към друг, без връщане назад.</p>
+
+<div class="caveat">
+  <p><strong>Преди да гледаш: бургерът не е iOS модел.</strong> Той идва от Android и от
+  уеба. Apple го няма в указанията си и почти нито едно системно приложение не го ползва —
+  там моделът е лента долу или прелистване. Казвам го, защото изречението „както имат
+  повечето iOS приложения“ не е вярно, а решението е по-лесно с верни думи.</p>
+  <p><strong>И едно измеримо нещо.</strong> Бургерът стои горе вляво — най-трудната точка
+  за палец. Същото място ползваме нарочно за „Спри“ и „Стига“, <em>защото</em> е трудно.
+  Изискване <strong>И-45</strong> („работи с една ръка“) важи за цялото приложение, не само
+  за паник режима. Защрихованата ивица в първия телефон отбелязва зоната,
+  до която палецът стига най-трудно при нормален захват.</p>
+</div>
+
+<div class="row">
+
+  <!-- Г · БУРГЕР -->
+  <div class="option">
+    <h2>Г · Бургер меню</h2>
+    <p class="tag">Каквото поиска</p>
+    <div class="phone">
+      <div class="inner">
+        <div class="marker">прототип · стойностите не са одобрени</div>
+        <div class="topbar">
+          <span class="burger"><i></i><i></i><i></i></span>
+          <span class="where">Тялото</span>
+        </div>
+        <p class="sub">Бързи неща, които се усещат в тялото</p>
+        <div class="scroll">
+          <div class="pick"><span>Студена вода</span><span class="mins">1 мин</span></div>
+          <div class="pick"><span>Рамене и корем</span><span class="mins">1 мин</span></div>
+          <div class="pick"><span>Огледай стаята</span><span class="mins">1 мин</span></div>
+          <div class="pick"><span>Три неща</span><span class="mins">1 мин</span></div>
+          <div class="pick"><span>Длан върху тялото</span><span class="mins">2 мин</span></div>
+          <div class="pick"><span>Самопрегръдка</span><span class="mins">1 мин</span></div>
+        </div>
+      </div>
+      <div class="reach"><span>трудно за палец</span></div>
+    </div>
+    <p class="verdict"><b>За:</b> видовете са навсякъде на един допир, а заглавието горе
+      винаги казва къде си.
+      <span class="against">Против: чуждо на iOS; иконата крие какво има зад нея; стои
+      точно там, където палецът не стига.</span></p>
+  </div>
+
+  <!-- Г · БУРГЕРЪТ ОТВОРЕН -->
+  <div class="option">
+    <h2>Г · Същото, отворено</h2>
+    <p class="tag">Какво се показва при допир</p>
+    <div class="phone">
+      <div class="inner">
+        <div class="marker">прототип · стойностите не са одобрени</div>
+        <div class="topbar">
+          <span class="burger"><i></i><i></i><i></i></span>
+          <span class="where">Тялото</span>
+        </div>
+      </div>
+      <div class="drawer">
+        <div class="panel">
+          <h3>Упражнения</h3>
+          <div class="item on"><span>Тялото</span><span class="n">11</span></div>
+          <div class="item"><span>Притеснението</span><span class="n">5</span></div>
+          <div class="item"><span>Вниманието</span><span class="n">4</span></div>
+          <div class="item"><span>Действието</span><span class="n">3</span></div>
+          <div class="item"><span>Нагласата</span><span class="n">4</span></div>
+          <div class="item"><span>Предизвикване</span><span class="n">личен режим</span></div>
+          <h3>Друго</h3>
+          <div class="item"><span>Дишай</span><span class="n"></span></div>
+          <div class="item"><span>Помощ</span><span class="n"></span></div>
+          <div class="item"><span>Това е прототип</span><span class="n"></span></div>
+        </div>
+      </div>
+    </div>
+    <p class="verdict"><b>За:</b> тук се вижда истинското му предимство — побира и видовете,
+      и всичко останало, без да яде място на екрана.
+      <span class="against">Против: цял екран, който закрива всичко, за да смени един
+      списък. И „Дишай“ в чекмедже е крачка назад — днес е на един допир.</span></p>
+  </div>
+
+  <!-- Д · ТАБ БАР -->
+  <div class="option">
+    <h2>Д · Лента долу</h2>
+    <p class="tag">Моделът на iOS за същото</p>
+    <div class="phone">
+      <div class="inner">
+        <div class="marker">прототип · стойностите не са одобрени</div>
+        <p class="title">Тялото</p>
+        <p class="sub">Бързи неща, които се усещат в тялото</p>
+        <div class="scroll">
+          <div class="pick"><span>Студена вода</span><span class="mins">1 мин</span></div>
+          <div class="pick"><span>Рамене и корем</span><span class="mins">1 мин</span></div>
+          <div class="pick"><span>Огледай стаята</span><span class="mins">1 мин</span></div>
+          <div class="pick"><span>Три неща</span><span class="mins">1 мин</span></div>
+          <div class="pick"><span>Длан върху тялото</span><span class="mins">2 мин</span></div>
+        </div>
+        <div class="tabbar">
+          <span class="tab on"><span class="dot"></span>Тялото</span>
+          <span class="tab"><span class="dot"></span>Притесне&shy;нието</span>
+          <span class="tab"><span class="dot"></span>Внима&shy;нието</span>
+          <span class="tab"><span class="dot"></span>Дейст&shy;вието</span>
+          <span class="tab"><span class="dot"></span>Нагла&shy;сата</span>
+        </div>
+      </div>
+    </div>
+    <p class="verdict"><b>За:</b> в долната трета, с палец, без скриване. Всички видове се
+      виждат винаги и смяната е един допир.
+      <span class="against">Против: пет етикета на 375 px стават тесни и думите се чупят.
+      Шестият вид (предизвикване) няма къде да отиде.</span></p>
+  </div>
+
+  <!-- Е · ЛЕНТИ ГОРЕ -->
+  <div class="option">
+    <h2>Е · Ленти над списъка</h2>
+    <p class="tag">Най-малката промяна</p>
+    <div class="phone">
+      <div class="inner">
+        <div class="marker">прототип · стойностите не са одобрени</div>
+        <p class="title">Упражнения</p>
+        <div class="chips">
+          <span class="chip on">Тялото</span>
+          <span class="chip">Притеснението</span>
+          <span class="chip">Вниманието</span>
+        </div>
+        <p class="sub">Бързи неща, които се усещат в тялото</p>
+        <div class="scroll">
+          <div class="pick"><span>Студена вода</span><span class="mins">1 мин</span></div>
+          <div class="pick"><span>Рамене и корем</span><span class="mins">1 мин</span></div>
+          <div class="pick"><span>Огледай стаята</span><span class="mins">1 мин</span></div>
+          <div class="pick"><span>Три неща</span><span class="mins">1 мин</span></div>
+          <div class="pick"><span>Длан върху тялото</span><span class="mins">2 мин</span></div>
+          <div class="pick"><span>Самопрегръдка</span><span class="mins">1 мин</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="verdict"><b>За:</b> нищо не се крие и нищо не се мести долу. Шестият вид
+      просто се добавя в лентата. Най-малката промяна спрямо днешното.
+      <span class="against">Против: лентата се плъзга настрани, а плъзгането се пропуска
+      по-лесно от допир. Горе е, макар и не чак в ъгъла.</span></p>
+  </div>
+
+</div>
+
+<p class="note"><strong>Какво не се променя в нито един от четирите.</strong> Вторият
+екран е вариант А — списък на един вид, с минути до всяко име. Входът от „Дишай“ остава
+тихият надпис долу, а „Помощ“ остава долу на всеки екран от паник пътя. Нито един не
+добавя препоръка коя практика да направиш.</p>
+
+<p class="note"><strong>Ако питаш мен:</strong> Е за сега, Д по-нататък. Е е няколко реда
+върху това, което вече работи, и не мести нищо. Д е правилният iOS модел, но иска решение
+какво става с шестия вид и ще се чупи при едър шрифт. Г ще го направя, ако го искаш — но
+нека е, защото го харесваш, а не защото „така правят iOS приложенията“.</p>
+
+</div>
+</body>
+</html>
