@@ -323,6 +323,14 @@
   #section .lead { color: var(--quiet); font-size: 0.9rem; line-height: 1.5;
                    margin: 0 0 1rem; }
 
+  #screening { overflow-y: auto; padding-top: 0.5rem; }
+  #screening h2 { font-family: ui-serif, Georgia, serif; font-size: 1.5rem;
+                  margin: 0.5rem 0 0.35rem; }
+  #screening .lead { color: var(--quiet); font-size: 0.9rem; line-height: 1.5;
+                     margin: 0 0 1rem; }
+  #screeninglist li { line-height: 1.6; margin-bottom: 0.4rem; }
+  #screeninglist ul { margin: 0 0 1rem; padding-left: 1.2rem; }
+
   #facts { overflow-y: auto; padding-top: 0.5rem; }
   #facts h2, #reply h2 { font-family: ui-serif, Georgia, serif; font-size: 1.5rem;
                          margin: 0.5rem 0 0.35rem; }
@@ -467,6 +475,12 @@
      избира.</p>
   <div class="row"><span>Секунди до първото вдишване</span><span id="measured" class="muted">—</span></div>
   <div class="row"><span>Последна промяна в скалата</span><span id="lastchange" class="muted">—</span></div>
+  <div class="row"><span>Личен режим</span>
+    <button class="quiet" id="personalbtn" style="width:auto;min-width:120px">изключен</button></div>
+  <p class="muted">Включва <strong>предизвикването</strong> — упражнения, които нарочно
+     вдигат пулса и дишането. Те не са минали през психолог и нямат истински екраниращи
+     въпроси, затова стоят изключени за всеки, който отвори този адрес. Включиш ли ги, преди
+     всяко идва екран с противопоказанията.</p>
   <div class="row"><span>Версия</span><span id="build" class="muted">—</span></div>
   <div class="row"><span>Нова версия</span>
     <button class="quiet" id="checkupdate" style="width:auto;min-width:120px">провери</button></div>
@@ -545,6 +559,21 @@
   </div>
 </section>
 
+<!-- ЕКРАН 7д · преди предизвикване -->
+<section class="screen" id="screening">
+  <h2 id="screeningtitle">Преди предизвикване</h2>
+  <p class="lead">Предизвикването вдига пулса и дишането нарочно. Ако нещо от долните е
+     вярно за теб, не го прави днес — или изобщо, без да питаш лекар.</p>
+  <div id="screeninglist"></div>
+  <p class="lead"><strong>Това не са екраниращи въпроси от специалист.</strong> Те са
+     предупрежденията, които всяко упътване за физическо натоварване носи. Истинските
+     чакат задача 6.4.</p>
+  <div class="actions">
+    <button id="screeningok">Нито едно от тях</button>
+    <button class="quiet" data-go="practices">Не сега</button>
+  </div>
+</section>
+
 <!-- ЕКРАН 8 · едно упражнение -->
 <section class="screen" id="practice">
   <div class="topbar">
@@ -598,7 +627,8 @@
 
   var el = function (id) { return document.getElementById(id); };
   var screens = ["enter", "breathe", "pause", "ground", "after", "crisis", "about",
-                 "practices", "section", "facts", "reply", "timer", "practice", "rate"];
+                 "practices", "section", "facts", "reply", "timer", "screening",
+                 "practice", "rate"];
   var voiceOn = false;
   var SHOW_COUNT = true;
   var tapAt = 0, firstCueAt = 0;
@@ -876,6 +906,18 @@
     b.addEventListener("click", function () { show("about"); });
   });
 
+  function paintPersonal() {
+    el("personalbtn").textContent = personalOn ? "включен" : "изключен";
+  }
+
+  el("personalbtn").addEventListener("click", function () {
+    personalOn = !personalOn;
+    try { localStorage.setItem(PERSONAL_KEY, personalOn ? "1" : "0"); } catch (e) {}
+    paintPersonal();
+    // Менюто се построява наново: секцията „Предизвикване" се появява или изчезва.
+    renderMenu();
+  });
+
   el("countbtn").addEventListener("click", function () {
     SHOW_COUNT = !SHOW_COUNT;
     el("countbtn").textContent = SHOW_COUNT ? "показано" : "скрито";
@@ -896,7 +938,21 @@
   // Нищо не се придвижва само; човекът натиска.
   // ------------------------------------------------------------------
 
-  var CATALOGUE = window.MINAVA_PRACTICES || [];
+  // Личният режим. Уеб съответствието на BuildKind.personal: изключен по подразбиране,
+  // защото този адрес е публичен и всеки може да го отвори. Включването е нарочно
+  // действие на екрана за прототипа, не нещо, което се случва от само себе си.
+  var PERSONAL_KEY = "minava.personal";
+  var personalOn = false;
+  try { personalOn = localStorage.getItem(PERSONAL_KEY) === "1"; } catch (e) {}
+
+  var ALL_PRACTICES = window.MINAVA_PRACTICES || [];
+  var SCREENING = window.MINAVA_SCREENING || null;
+
+  function CATALOGUE_NOW() {
+    return ALL_PRACTICES.filter(function (p) { return personalOn || !p.personalOnly; });
+  }
+
+  var CATALOGUE = CATALOGUE_NOW();
   var SIDE_WORD = { right: "дясна страна", left: "лява страна" };
   var P = { practice: null, seq: [], index: 0, before: null, after: null,
             stepAt: 0, asking: null, gate: 0 };
@@ -964,28 +1020,30 @@
     "worry": "Притеснението",
     "attention": "Вниманието",
     "action": "Действието",
-    "mindset": "Нагласата"
+    "mindset": "Нагласата",
+    "challenge": "Предизвикване"
   };
   var SECTION_WHAT = {
     "nervous-system": "Бързи неща, които се усещат в тялото",
     "worry": "Какво правиш с притеснението, вместо да спориш с него",
     "attention": "Къси практики за внимание",
     "action": "Да направиш онова, което отлагаш",
-    "mindset": "Какво си казваш, преди да се е случило"
+    "mindset": "Какво си казваш, преди да се е случило",
+    "challenge": "Нарочно предизвикване. Само в личен режим"
   };
 
   var openSectionId = null;
 
   function sectionsInOrder() {
     var order = [], seen = {};
-    CATALOGUE.forEach(function (p) {
+    CATALOGUE_NOW().forEach(function (p) {
       if (!seen[p.section]) { seen[p.section] = true; order.push(p.section); }
     });
     return order;
   }
 
   function practicesIn(section) {
-    return CATALOGUE.filter(function (p) { return p.section === section; });
+    return CATALOGUE_NOW().filter(function (p) { return p.section === section; });
   }
 
   // Първият избор е между пет неща, не между двайсет и шест. Двайсет и шест реда са
@@ -1069,14 +1127,46 @@
     });
   }
 
+  // Предизвикване не тръгва направо. Между човека и него стои екран с
+  // противопоказанията — не защото е формалност, а защото упражнението вдига пулса
+  // нарочно и някои хора не бива да го правят.
+  var pendingChallenge = null;
+
+  function renderScreening() {
+    var box = el("screeninglist");
+    box.innerHTML = "";
+    if (!SCREENING) { return; }
+    var list = document.createElement("ul");
+    SCREENING.questions.forEach(function (q) {
+      var li = document.createElement("li");
+      li.textContent = q;
+      list.appendChild(li);
+    });
+    box.appendChild(list);
+  }
+
   function startPractice(p) {
+    if (p.personalOnly) {
+      pendingChallenge = p;
+      el("screeningtitle").textContent = (SCREENING && SCREENING.title) || "Преди предизвикване";
+      renderScreening();
+      show("screening");
+      return;
+    }
+    beginPractice(p);
+  }
+
+  function beginPractice(p, skipRating) {
     P.practice = p;
     P.seq = sequenceOf(p);
     P.index = 0;
     P.before = null;
     P.after = null;
     el("presult").style.display = "none";
-    if (p.measure) { askRating(true); } else { runStep(0); }
+    // Пътят обратно след предизвикване не пита нищо. Смисълът му е човек да се върне в
+    // регулация, а не да се измери — въпрос точно там е забавяне пред нещото, което
+    // трябва да стане веднага.
+    if (p.measure && !skipRating) { askRating(true); } else { runStep(0); }
   }
 
   function askRating(isBefore) {
@@ -1183,6 +1273,9 @@
       el("presult").textContent = "Беше " + P.before + ". Сега " + P.after + ".";
       el("presult").style.display = "";
     }
+    // Предизвикването не свършва със списък. То свършва с пътя обратно.
+    if (goToRecovery(P.practice)) { return; }
+
     // Връщаме се там, откъдето е тръгнало упражнението, а не в менюто: човек, който
     // прави две практики подред, ги прави от един и същи вид.
     backToSection();
@@ -1192,10 +1285,32 @@
   function stopPractice() {
     clearInterval(P.gate);
     if (window.speechSynthesis) { window.speechSynthesis.cancel(); }
+    var was = P.practice;
     P.before = null;
     P.after = null;
     el("presult").style.display = "none";
+    // Прекъснатото предизвикване иска връщането повече, не по-малко.
+    if (goToRecovery(was)) { return; }
     backToSection();
+  }
+
+  el("screeningok").addEventListener("click", function () {
+    var p = pendingChallenge;
+    pendingChallenge = null;
+    if (p) { beginPractice(p); }
+  });
+
+  // Предизвикване, което свършва и връща човек в деня му, е онова, срещу което
+  // предупреждават и книгата, и литературата. Затова пътят обратно е следващият екран,
+  // а не съвет — същото, което PracticeSession прави със събитието mustRecover.
+  function goToRecovery(practice) {
+    if (!practice || !practice.recovery) { return false; }
+    var recovery = ALL_PRACTICES.filter(function (x) {
+      return x.id === practice.recovery;
+    })[0];
+    if (!recovery) { return false; }
+    beginPractice(recovery, true);
+    return true;
   }
 
   function backToSection() {
@@ -1342,6 +1457,7 @@
   renderFacts();
   loadReply();
 
+  paintPersonal();
   renderMenu();
   showLastReading();
 
@@ -1354,7 +1470,7 @@
   // Версията на прототипа. Вдига се заедно с името на кеша в sw.js, а
   // tools/sync_prototype.py --check проваля билда, ако двете се разминат — иначе
   // ще обещава обновяване, което не е стигнало до телефона.
-  var BUILD = 6;
+  var BUILD = 7;
 
   el("build").textContent = "прототип " + BUILD + " · " +
                             CATALOGUE.length + " упражнения";

@@ -31,12 +31,17 @@ TARGET = os.path.join(ROOT, "docs", "prototype", "practices.js")
 FACTS_SOURCE = os.path.join(ROOT, "content", "психообразование.md")
 FACTS_TARGET = os.path.join(ROOT, "docs", "prototype", "facts.js")
 
-# Видовете, които прототипът има право да показва.
+# Видовете, които прототипът показва по подразбиране.
 PUBLISHABLE_KINDS = ("regulation", "grounding")
+
+# Експозицията се пренася, но НЕ се предлага: стига до екрана само в личния режим,
+# който е изключен по подразбиране, и само след екрана с противопоказанията. Това е
+# уеб съответствието на BuildKind.personal — виж docs/ТЕСТ-НА-ТЕЛЕФОН.md.
+PERSONAL_KINDS = ("exposure",)
 
 # Редът на секциите на екрана. Отпред е онова, което човек посяга да направи, когато
 # вече се чувства зле; отзад — онова, което се прави в спокоен момент.
-SECTION_ORDER = ["nervous-system", "worry", "attention", "action", "mindset"]
+SECTION_ORDER = ["nervous-system", "worry", "attention", "action", "mindset", "challenge"]
 
 # Редът вътре в секция. Практика, която не е в списъка, не изчезва: влиза накрая, по
 # азбучен ред.
@@ -67,6 +72,8 @@ ORDER = [
     "three-steps-support",
     "safety-questions",
     "metacognition-questions",
+    "graded-challenge",
+    "ladder-crowd",
 ]
 
 HEADER = u"""// Генериран файл. Не се редактира на ръка.
@@ -77,6 +84,9 @@ HEADER = u"""// Генериран файл. Не се редактира на �
 // Експозиционните протоколи нарочно ги няма: прототипът е публичен, а
 // степенуваното предизвикване няма екраниращи въпроси (задача 6.4).
 window.MINAVA_PRACTICES = """
+
+SCREENING_HEADER = u"""
+window.MINAVA_SCREENING = """
 
 
 def steps_of(doc, field):
@@ -99,8 +109,12 @@ def collect():
             continue
         doc = json.load(io.open(os.path.join(SOURCE_DIR, name), encoding="utf-8"))
 
-        if doc.get("kind") not in PUBLISHABLE_KINDS:
-            skipped.append((name, doc.get("kind")))
+        kind = doc.get("kind")
+        if kind == "screening":
+            # Екраниращият протокол не е упражнение; пренася се отделно.
+            continue
+        if kind not in PUBLISHABLE_KINDS and kind not in PERSONAL_KINDS:
+            skipped.append((name, kind))
             continue
         # Одобреното живее в protocols/. Ако попадне тук, нещо е сгрешено и мълчаливото
         # пренасяне би го превърнало в „публикувано одобрено съдържание".
@@ -114,6 +128,13 @@ def collect():
             "section": doc["section"],
             "steps": steps_of(doc, "steps"),
         }
+        if kind in PERSONAL_KINDS:
+            # Единственият флаг, който интерфейсът гледа, преди да покаже нещо.
+            entry["personalOnly"] = True
+            entry["recovery"] = doc["recoveryProtocol"]
+            entry["screening"] = doc["excludedBy"]
+        if doc.get("situation"):
+            entry["situation"] = doc["situation"]
         if doc.get("estimatedMinutes"):
             entry["minutes"] = doc["estimatedMinutes"]
         if doc.get("stopRule"):
@@ -140,9 +161,28 @@ def collect():
     return practices, skipped
 
 
-def rendered(practices):
+def collect_screening():
+    """Противопоказанията, като отделен запис.
+
+    Не са упражнение и не стоят в каталога: прочитат се веднъж, точно преди
+    предизвикване, и всеки отговор „да" го спира.
+    """
+    path = os.path.join(SOURCE_DIR, "exposure-screening.json")
+    if not os.path.exists(path):
+        return None
+    doc = json.load(io.open(path, encoding="utf-8"))
+    return {"id": doc["id"],
+            "title": doc["title"]["bg"],
+            "questions": [s["text"]["bg"] for s in doc.get("steps") or []]}
+
+
+def rendered(practices, screening):
     body = json.dumps(practices, ensure_ascii=False, indent=2, sort_keys=True)
-    return HEADER + body + u";\n"
+    text = HEADER + body + u";\n"
+    if screening:
+        text += SCREENING_HEADER + json.dumps(screening, ensure_ascii=False, indent=2,
+                                              sort_keys=True) + u";\n"
+    return text
 
 
 FACTS_HEADER = u"""// Генериран файл. Не се редактира на ръка.
@@ -215,7 +255,11 @@ def main():
         print("ГРЕШКА версията в index.html е %d, а кешът в sw.js е %d — вдигат се "
               "заедно" % (page_build, worker_build))
         return 1
-    text = rendered(practices)
+    screening = collect_screening()
+    if not screening:
+        print("ГРЕШКА липсва екраниращият протокол за предизвикване")
+        return 1
+    text = rendered(practices, screening)
 
     for name, reason in skipped:
         print("пропуснато %s (%s)" % (name, reason))

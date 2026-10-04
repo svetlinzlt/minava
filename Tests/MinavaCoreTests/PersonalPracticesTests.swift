@@ -20,6 +20,12 @@ final class PersonalPracticesTests: XCTestCase {
         }
     }
 
+    /// Папката вече съдържа и нещо, което не е упражнение: екраниращия протокол, който
+    /// стои пред предизвикването. Повечето правила долу важат за практиките, не за него.
+    private func practices() throws -> [(name: String, file: ClinicalProtocol)] {
+        try documents().filter { $0.file.isPractice }
+    }
+
     // MARK: - Границата
 
     /// The guarantee, stated as a test: not one of these runs in a public build.
@@ -27,7 +33,7 @@ final class PersonalPracticesTests: XCTestCase {
         let library = ProtocolLibrary.load(from: folder, build: .release)
 
         XCTAssertTrue(library.isEmpty, "нито една практика оттук не влиза в публично издание")
-        XCTAssertEqual(library.rejections.count, try documents().count)
+        XCTAssertEqual(library.rejections.count, try practices().count)
         for rejection in library.rejections {
             XCTAssertTrue(rejection.reason.contains("одобрение"),
                           "причината трябва да е липсата на одобрение: \(rejection.reason)")
@@ -47,7 +53,7 @@ final class PersonalPracticesTests: XCTestCase {
 
         XCTAssertTrue(library.rejections.isEmpty,
                       "нищо не бива да е счупено: \(library.rejections)")
-        XCTAssertEqual(library.practices.count, try documents().count)
+        XCTAssertEqual(library.practices.count, try practices().count)
         XCTAssertTrue(library.containsProvisional)
         XCTAssertTrue(library.practices.allSatisfy(\.isProvisional))
     }
@@ -63,7 +69,7 @@ final class PersonalPracticesTests: XCTestCase {
     }
 
     func testEveryPracticeHasStepsAndBulgarianText() throws {
-        for (name, file) in try documents() {
+        for (name, file) in try practices() {
             XCTAssertNil(file.structuralDefect(), name)
             XCTAssertFalse(file.title.bg.isEmpty, name)
             XCTAssertFalse((file.steps ?? []).isEmpty, name)
@@ -95,6 +101,32 @@ final class PersonalPracticesTests: XCTestCase {
         }
 
         XCTAssertGreaterThan(exposures, 0, "очаква се поне една експозиционна практика")
+    }
+
+    /// Откакто предизвикването е достижимо на телефон, противопоказанията не са бележка
+    /// в документ: всяко експозиционно упражнение сочи към екраниращ протокол, и той
+    /// трябва да съществува.
+    func testEveryExposureNamesAScreeningThatExists() throws {
+        let all = try documents()
+        let screenings = Set(all.filter { $0.file.kind == .screening }.map(\.file.id))
+        XCTAssertFalse(screenings.isEmpty, "липсва екраниращ протокол")
+
+        for (name, file) in all where file.kind == .exposure {
+            let gate = try XCTUnwrap(file.excludedBy,
+                                     "\(name): предизвикване без нито едно предупреждение")
+            XCTAssertTrue(screenings.contains(gate),
+                          "\(name) сочи към \(gate), а такъв протокол няма")
+        }
+    }
+
+    /// Екраниращият протокол не е упражнение и не бива да се върти като такова.
+    func testTheScreeningProtocolIsNotRunnable() throws {
+        for (name, file) in try documents() where file.kind == .screening {
+            XCTAssertFalse(file.isPractice, name)
+            XCTAssertThrowsError(try ExecutablePractice(file, build: .personal)) {
+                XCTAssertEqual($0 as? ProtocolGateError, .notAPractice(id: file.id))
+            }
+        }
     }
 
     /// Load-time half of the same rule: if the recovery practice is missing from the folder,
@@ -136,7 +168,7 @@ final class PersonalPracticesTests: XCTestCase {
     /// Каталогът мина двайсет и пет практики. Плосък списък спира да работи и затова
     /// секцията е задължителна, а не препоръчителна.
     func testEveryPracticeHasASection() throws {
-        for (name, file) in try documents() {
+        for (name, file) in try practices() {
             XCTAssertNotNil(file.section, "\(name) няма секция")
         }
     }
@@ -155,7 +187,7 @@ final class PersonalPracticesTests: XCTestCase {
     }
 
     func testEveryPracticeSaysHowLongItTakes() throws {
-        for (name, file) in try documents() {
+        for (name, file) in try practices() {
             let minutes = try XCTUnwrap(file.estimatedMinutes, name)
             XCTAssertGreaterThan(minutes, 0, name)
         }
