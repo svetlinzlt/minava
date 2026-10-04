@@ -304,6 +304,25 @@
   }
 
   /* Секциите в списъка с упражнения. */
+  /* Редовете на менюто. По-високи от практиките, защото носят две реда текст и
+     защото това е първият избор — той трябва да е най-лесният. */
+  .menurow {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    width: 100%; min-height: 76px; padding: 1rem; margin-bottom: 0.6rem;
+    border: 1px solid var(--line); border-radius: 14px;
+    background: var(--paper); color: var(--pine); text-align: left;
+    font-size: 1.1rem;
+  }
+  .menurow .what { display: block; color: var(--quiet); font-size: 0.85rem;
+                   margin-top: 0.2rem; line-height: 1.35; }
+  .menurow .count { color: var(--quiet); font-size: 0.8rem; white-space: nowrap; }
+
+  #section { overflow-y: auto; padding-top: 0.5rem; }
+  #section h2 { font-family: ui-serif, Georgia, serif; font-size: 1.5rem;
+                margin: 0.5rem 0 0.35rem; }
+  #section .lead { color: var(--quiet); font-size: 0.9rem; line-height: 1.5;
+                   margin: 0 0 1rem; }
+
   #practices h3 {
     font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;
     color: var(--quiet); font-weight: 500;
@@ -449,16 +468,23 @@
   <div class="actions"><button data-go="enter">Отначало</button></div>
 </section>
 
-<!-- ЕКРАН 7 · упражненията -->
+<!-- ЕКРАН 7 · менюто с видовете упражнения -->
 <section class="screen" id="practices">
   <h2>Упражнения</h2>
   <p class="lead">Кратки практики за между епизодите. Правят се в спокоен момент, не по
      време на атака — за това е „Дишай“.</p>
+  <div id="menulist"></div>
+  <p class="lead">Чернови са. Не са минали през психолог и формулировките са наши.</p>
+  <div class="actions"><button class="quiet" data-go="enter">Назад</button></div>
+</section>
+
+<!-- ЕКРАН 7а · един вид упражнения -->
+<section class="screen" id="section">
+  <h2 id="sectiontitle">Упражнения</h2>
+  <p class="lead" id="sectionlead"></p>
   <p class="lead" id="presult" style="display:none"></p>
   <div id="picklist"></div>
-  <p class="lead">Написани по книга на психолог Даниел Троев. <strong>Чернови са</strong> —
-     не са минали през него и формулировките са наши, не негови.</p>
-  <div class="actions"><button class="quiet" data-go="enter">Назад</button></div>
+  <div class="actions"><button class="quiet" data-go="practices">Назад</button></div>
 </section>
 
 <!-- ЕКРАН 8 · едно упражнение -->
@@ -512,7 +538,7 @@
 
   var el = function (id) { return document.getElementById(id); };
   var screens = ["enter", "breathe", "pause", "ground", "after", "crisis", "about",
-                 "practices", "practice", "rate"];
+                 "practices", "section", "practice", "rate"];
   var voiceOn = false;
   var SHOW_COUNT = true;
   var tapAt = 0, firstCueAt = 0;
@@ -866,8 +892,8 @@
     el("lastchange").textContent = r.before + " → " + r.after + (old ? " · отпреди време" : "");
   }
 
-  // Заглавията на секциите са интерфейс, не клинично съдържание, затова стоят тук,
-  // а не в clinical/. Редът идва от подредбата на самия каталог.
+  // Заглавията и описанията на видовете са интерфейс, не клинично съдържание, затова
+  // стоят тук, а не в clinical/. Редът идва от подредбата на самия каталог.
   var SECTION_TITLE = {
     "nervous-system": "Тялото",
     "worry": "Притеснението",
@@ -875,19 +901,73 @@
     "action": "Действието",
     "mindset": "Нагласата"
   };
+  var SECTION_WHAT = {
+    "nervous-system": "Бързи неща, които се усещат в тялото",
+    "worry": "Какво правиш с притеснението, вместо да спориш с него",
+    "attention": "Къси практики за внимание",
+    "action": "Да направиш онова, което отлагаш",
+    "mindset": "Какво си казваш, преди да се е случило"
+  };
 
-  function renderList() {
-    var list = el("picklist"), seen = {};
+  var openSectionId = null;
+
+  function sectionsInOrder() {
+    var order = [], seen = {};
+    CATALOGUE.forEach(function (p) {
+      if (!seen[p.section]) { seen[p.section] = true; order.push(p.section); }
+    });
+    return order;
+  }
+
+  function practicesIn(section) {
+    return CATALOGUE.filter(function (p) { return p.section === section; });
+  }
+
+  // Първият избор е между пет неща, не между двайсет и шест. Двайсет и шест реда са
+  // списък; пет са въпрос, на който човек може да отговори.
+  function renderMenu() {
+    var list = el("menulist");
     list.innerHTML = "";
 
-    CATALOGUE.forEach(function (p) {
-      if (!seen[p.section]) {
-        seen[p.section] = true;
-        var h = document.createElement("h3");
-        h.textContent = SECTION_TITLE[p.section] || p.section;
-        list.appendChild(h);
-      }
+    sectionsInOrder().forEach(function (section) {
+      var found = practicesIn(section);
+      var b = document.createElement("button");
+      b.className = "menurow";
 
+      var left = document.createElement("span");
+      var name = document.createElement("strong");
+      name.textContent = SECTION_TITLE[section] || section;
+      var what = document.createElement("span");
+      what.className = "what";
+      what.textContent = SECTION_WHAT[section] || "";
+      left.appendChild(name);
+      left.appendChild(what);
+
+      var count = document.createElement("span");
+      count.className = "count";
+      count.textContent = found.length;
+
+      b.appendChild(left);
+      b.appendChild(count);
+      b.addEventListener("click", function () { openSection(section); });
+      list.appendChild(b);
+    });
+  }
+
+  function openSection(section) {
+    openSectionId = section;
+    el("sectiontitle").textContent = SECTION_TITLE[section] || section;
+    el("sectionlead").textContent = SECTION_WHAT[section] || "";
+    el("presult").style.display = "none";
+    renderList(section);
+    show("section");
+  }
+
+  function renderList(section) {
+    var list = el("picklist");
+    list.innerHTML = "";
+
+    practicesIn(section).forEach(function (p) {
       var b = document.createElement("button");
       b.className = "pick";
       var name = document.createElement("span");
@@ -1016,7 +1096,9 @@
       el("presult").textContent = "Беше " + P.before + ". Сега " + P.after + ".";
       el("presult").style.display = "";
     }
-    show("practices");
+    // Връщаме се там, откъдето е тръгнало упражнението, а не в менюто: човек, който
+    // прави две практики подред, ги прави от един и същи вид.
+    backToSection();
   }
 
   // Спирането е винаги възможно и не пази нищо. Половин измерване не е измерване.
@@ -1026,7 +1108,11 @@
     P.before = null;
     P.after = null;
     el("presult").style.display = "none";
-    show("practices");
+    backToSection();
+  }
+
+  function backToSection() {
+    if (openSectionId) { show("section"); } else { show("practices"); }
   }
 
   el("pnext").addEventListener("click", function () {
@@ -1060,7 +1146,7 @@
     }
   }());
 
-  renderList();
+  renderMenu();
   showLastReading();
 
   refreshVoiceRow();
@@ -1072,7 +1158,7 @@
   // Версията на прототипа. Вдига се заедно с името на кеша в sw.js, а
   // tools/sync_prototype.py --check проваля билда, ако двете се разминат — иначе
   // ще обещава обновяване, което не е стигнало до телефона.
-  var BUILD = 4;
+  var BUILD = 5;
 
   el("build").textContent = "прототип " + BUILD + " · " +
                             CATALOGUE.length + " упражнения";
@@ -1082,7 +1168,8 @@
   function safeToReload() {
     return el("enter").classList.contains("on") ||
            el("about").classList.contains("on") ||
-           el("practices").classList.contains("on");
+           el("practices").classList.contains("on") ||
+           el("section").classList.contains("on");
   }
 
   if ("serviceWorker" in navigator) {
