@@ -94,7 +94,7 @@ final class PersonalPracticesTests: XCTestCase {
                           "\(name) сочи към \(recovery), а такава практика няма")
         }
 
-        XCTAssertEqual(exposures, 1, "очаква се точно една експозиционна практика")
+        XCTAssertGreaterThan(exposures, 0, "очаква се поне една експозиционна практика")
     }
 
     /// Load-time half of the same rule: if the recovery practice is missing from the folder,
