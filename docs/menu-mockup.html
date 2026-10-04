@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Минава · три менюта за избор</title>
+<style>
+  :root {
+    --air:   #E9EFE7;
+    --paper: #FCFDFB;
+    --pine:  #17241C;
+    --alive: #1F7342;
+    --quiet: #6B7A70;
+    --line:  #D3DED0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --air:   #0E1512; --paper: #131C18; --pine: #E4EDE6;
+      --alive: #4FA97A; --quiet: #8FA096; --line: #26332C;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 2rem 1rem 4rem;
+    background: var(--air); color: var(--pine);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    line-height: 1.5;
+  }
+  .page { max-width: 1180px; margin: 0 auto; }
+  h1 { font-family: ui-serif, Georgia, serif; font-size: clamp(1.8rem, 5vw, 2.4rem);
+       margin: 0 0 0.5rem; }
+  .intro { color: var(--quiet); max-width: 62ch; margin: 0 0 2rem; }
+  .intro strong { color: var(--pine); }
+
+  .row { display: flex; flex-wrap: wrap; gap: 2rem; align-items: flex-start; }
+  .option { flex: 1 1 320px; min-width: 300px; }
+  .option > h2 { font-family: ui-serif, Georgia, serif; font-size: 1.3rem; margin: 0 0 0.2rem; }
+  .option > .tag { color: var(--quiet); font-size: 0.85rem; margin: 0 0 1rem; }
+  .verdict { margin: 1rem 0 0; font-size: 0.9rem; line-height: 1.6; }
+  .verdict b { color: var(--alive); }
+  .verdict .against { color: var(--quiet); display: block; margin-top: 0.4rem; }
+
+  /* Телефонът */
+  .phone {
+    width: 100%; max-width: 340px; aspect-ratio: 375 / 760;
+    border: 1px solid var(--line); border-radius: 28px; background: var(--air);
+    padding: 1.1rem 1rem; overflow: hidden; display: flex; flex-direction: column;
+  }
+  .marker { flex: none; text-align: center; font-size: 0.6rem; letter-spacing: 0.08em;
+            text-transform: uppercase; color: var(--quiet); margin-bottom: 0.8rem; }
+  .title { font-family: ui-serif, Georgia, serif; font-size: 1.35rem; margin: 0 0 0.2rem; }
+  .sub { color: var(--quiet); font-size: 0.78rem; margin: 0 0 0.9rem; line-height: 1.45; }
+  .scroll { flex: 1 1 auto; overflow: hidden; }
+
+  /* А · редове с описание (това, което има днес) */
+  .listrow {
+    display: flex; align-items: center; justify-content: space-between; gap: 0.8rem;
+    min-height: 62px; padding: 0.7rem 0.85rem; margin-bottom: 0.5rem;
+    border: 1px solid var(--line); border-radius: 12px; background: var(--paper);
+  }
+  .listrow strong { font-size: 0.95rem; font-weight: 600; }
+  .listrow .what { display: block; color: var(--quiet); font-size: 0.72rem; margin-top: 0.15rem; }
+  .listrow .count { color: var(--quiet); font-size: 0.72rem; }
+
+  /* Б · плочки две в ред */
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .tile {
+    border: 1px solid var(--line); border-radius: 14px; background: var(--paper);
+    padding: 0.85rem; min-height: 96px; display: flex; flex-direction: column;
+    justify-content: space-between;
+  }
+  .tile .name { font-size: 0.95rem; font-weight: 600; line-height: 1.25; }
+  .tile .count { color: var(--quiet); font-size: 0.72rem; }
+  .tile.wide { grid-column: 1 / -1; min-height: 72px; }
+
+  /* В · въпрос и отговори */
+  .question { font-family: ui-serif, Georgia, serif; font-size: 1.15rem;
+              line-height: 1.35; margin: 0.4rem 0 1rem; }
+  .answer {
+    display: block; width: 100%; text-align: left;
+    min-height: 58px; padding: 0.75rem 0.9rem; margin-bottom: 0.5rem;
+    border: 1px solid var(--line); border-radius: 12px; background: var(--paper);
+    font-size: 0.95rem;
+  }
+  .answer .lead { display: block; color: var(--quiet); font-size: 0.72rem; margin-top: 0.15rem; }
+  .answer.accent { border-color: var(--alive); }
+  .answer.accent .lead { color: var(--alive); }
+  .quietline { color: var(--quiet); font-size: 0.78rem; text-align: center;
+               margin-top: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; }
+
+  .note { border-left: 2px solid var(--line); padding-left: 1rem; margin: 2.5rem 0 0;
+          color: var(--quiet); max-width: 70ch; font-size: 0.92rem; }
+  .note strong { color: var(--pine); }
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>Три менюта за избор</h1>
+<p class="intro">Едно и също съдържание — <strong>пет вида упражнения</strong>, двайсет и
+седем практики — подредено по три начина. „Предизвикване“ се появява само в личен режим и
+затова тук е показано с по-тих вид. Избери един и го казвай с буквата му; тогава го правя
+в кода.</p>
+
+<div class="row">
+
+  <!-- ВАРИАНТ А -->
+  <div class="option">
+    <h2>А · Редове с едно изречение</h2>
+    <p class="tag">Това, което има днес</p>
+    <div class="phone">
+      <div class="marker">прототип · стойностите не са одобрени</div>
+      <div class="scroll">
+        <p class="title">Упражнения</p>
+        <p class="sub">Кратки практики за между епизодите. Правят се в спокоен момент.</p>
+
+        <div class="listrow"><span><strong>Тялото</strong>
+          <span class="what">Бързи неща, които се усещат в тялото</span></span>
+          <span class="count">11</span></div>
+        <div class="listrow"><span><strong>Притеснението</strong>
+          <span class="what">Какво правиш с него, вместо да спориш</span></span>
+          <span class="count">5</span></div>
+        <div class="listrow"><span><strong>Вниманието</strong>
+          <span class="what">Къси практики за внимание</span></span>
+          <span class="count">4</span></div>
+        <div class="listrow"><span><strong>Действието</strong>
+          <span class="what">Да направиш онова, което отлагаш</span></span>
+          <span class="count">3</span></div>
+        <div class="listrow"><span><strong>Нагласата</strong>
+          <span class="what">Какво си казваш, преди да се е случило</span></span>
+          <span class="count">4</span></div>
+      </div>
+    </div>
+    <p class="verdict"><b>За:</b> описанието казва какво е, преди да влезеш. Работи при
+      най-едрия шрифт, защото всеки ред може да расте надолу.
+      <span class="against">Против: пет реда по две реда текст пълнят екрана — шестата
+      секция вече иска превъртане.</span></p>
+  </div>
+
+  <!-- ВАРИАНТ Б -->
+  <div class="option">
+    <h2>Б · Плочки две в ред</h2>
+    <p class="tag">Всичко се вижда наведнъж</p>
+    <div class="phone">
+      <div class="marker">прототип · стойностите не са одобрени</div>
+      <div class="scroll">
+        <p class="title">Упражнения</p>
+        <p class="sub">Избери откъде да започнеш.</p>
+
+        <div class="tiles">
+          <div class="tile"><span class="name">Тялото</span><span class="count">11 упражнения</span></div>
+          <div class="tile"><span class="name">Притеснението</span><span class="count">5 упражнения</span></div>
+          <div class="tile"><span class="name">Вниманието</span><span class="count">4 упражнения</span></div>
+          <div class="tile"><span class="name">Действието</span><span class="count">3 упражнения</span></div>
+          <div class="tile"><span class="name">Нагласата</span><span class="count">4 упражнения</span></div>
+          <div class="tile"><span class="name">Предизвикване</span><span class="count">само в личен режим</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="verdict"><b>За:</b> целите шест вида се виждат без превъртане. Най-бързо за
+      човек, който вече знае какво търси.
+      <span class="against">Против: няма място за описание — имената трябва да се носят
+      сами. При едър шрифт две колони стават тесни и думите се чупят.</span></p>
+  </div>
+
+  <!-- ВАРИАНТ В -->
+  <div class="option">
+    <h2>В · Въпрос и отговори</h2>
+    <p class="tag">Питаме каквото човек и без това се пита</p>
+    <div class="phone">
+      <div class="marker">прототип · стойностите не са одобрени</div>
+      <div class="scroll">
+        <p class="question">Какво ти е сега?</p>
+
+        <button class="answer accent">Тялото ми е напрегнато
+          <span class="lead">11 неща, най-късото е 1 мин</span></button>
+        <button class="answer">Една мисъл ме върти
+          <span class="lead">5 неща за притеснението</span></button>
+        <button class="answer">Разсеян съм, не съм тук
+          <span class="lead">4 практики за внимание</span></button>
+        <button class="answer">Отлагам нещо
+          <span class="lead">3 неща за действие</span></button>
+        <button class="answer">Спокоен съм, искам да подготвя
+          <span class="lead">4 за нагласата</span></button>
+
+        <p class="quietline">Виж всички по вид</p>
+      </div>
+    </div>
+    <p class="verdict"><b>За:</b> човек не избира категория, а разпознава състояние — това
+      е по-лесно в лош ден. Същите пет вида, назовани през преживяването.
+      <span class="against">Против: изреченията са клинично съдържание и искат 6.2.
+      Освен това насочват — а насочването е крачка към препоръка, която сме отхвърлили.
+      Ако го избереш, долният ред „виж всички по вид“ остава задължителен.</span></p>
+  </div>
+
+</div>
+
+<p class="note"><strong>Какво не се променя и в трите.</strong> Вторият екран остава
+същият — списък само на избрания вид, с минути до всяко име. Входът от „Дишай“ остава тихият
+надпис долу. Нито един от трите не добавя препоръка коя практика да направиш: човек избира
+сам, а приложението само подрежда.</p>
+
+<p class="note"><strong>Решението е отложено на 4 октомври 2026 г.</strong> Менюто остава както е — вариант А, редове с едно изречение. Тези страници стоят като записан избор за деня, в който въпросът се върне, а не като чакаща работа.</p>
+
+</div>
+</body>
+</html>

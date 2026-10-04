@@ -331,24 +331,6 @@
   #screeninglist li { line-height: 1.6; margin-bottom: 0.4rem; }
   #screeninglist ul { margin: 0 0 1rem; padding-left: 1.2rem; }
 
-  #facts { overflow-y: auto; padding-top: 0.5rem; }
-  #facts h2, #reply h2 { font-family: ui-serif, Georgia, serif; font-size: 1.5rem;
-                         margin: 0.5rem 0 0.35rem; }
-  #facts .lead, #reply .lead { color: var(--quiet); font-size: 0.9rem; line-height: 1.5;
-                               margin: 0 0 1rem; }
-  .fact { border: 1px solid var(--line); border-radius: 14px; background: var(--paper);
-          padding: 1rem; margin-bottom: 0.6rem; }
-  .fact h4 { margin: 0 0 0.4rem; font-size: 1.05rem; }
-  .fact p { margin: 0; line-height: 1.55; color: var(--pine); }
-  .fact .group { display: block; color: var(--quiet); font-size: 0.75rem;
-                 letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.4rem; }
-
-  #reply { overflow-y: auto; padding-top: 0.5rem; }
-  #reply textarea {
-    font: inherit; width: 100%; padding: 0.9rem; border-radius: 14px;
-    border: 1px solid var(--line); background: var(--paper); color: var(--pine);
-    line-height: 1.5; resize: none; margin-bottom: 0.75rem;
-  }
 
   #timer { justify-content: flex-end; }
   #timer .count { text-align: center; font-variant-numeric: tabular-nums; }
@@ -524,29 +506,6 @@
   <div class="actions"><button class="quiet" data-go="practices">Назад</button></div>
 </section>
 
-<!-- ЕКРАН 7б · няколко факта -->
-<section class="screen" id="facts">
-  <h2>Няколко факта</h2>
-  <p class="lead">Не са упражнения. Четат се в спокоен момент.</p>
-  <div id="factlist"></div>
-  <p class="lead">Чернова по книга на психолог Даниел Троев. Не е минала през него.</p>
-  <div class="actions"><button class="quiet" data-go="practices">Назад</button></div>
-</section>
-
-<!-- ЕКРАН 7в · подготвената реплика -->
-<section class="screen" id="reply">
-  <h2>Подготвената реплика</h2>
-  <p class="lead">Едно изречение, което казваш на глас, ако се наложи. Пишеш го сега,
-     в спокоен момент, за да не го търсиш тогава.</p>
-  <textarea id="replytext" rows="3" placeholder="Пада ми кръвното, имам нужда от пет минути."></textarea>
-  <p class="lead" id="replysaved"></p>
-  <div class="actions">
-    <button id="replysave">Запази</button>
-    <button class="plain" id="replyclear">Изтрий</button>
-    <button class="quiet" data-go="practices">Назад</button>
-  </div>
-</section>
-
 <!-- ЕКРАН 7г · таймер -->
 <section class="screen" id="timer">
   <div class="stage" style="justify-content:center">
@@ -585,6 +544,7 @@
   </div>
   <p id="pstop" style="display:none"></p>
   <div class="actions">
+    <button class="plain" id="pback" style="display:none">Една стъпка назад</button>
     <button class="plain" id="ptimer" style="display:none">Пусни таймера</button>
     <button class="plain" id="prepeat" style="display:none">Повтори на глас</button>
     <button id="pnext">Продължи</button>
@@ -602,7 +562,6 @@
 </section>
 
 <script src="practices.js"></script>
-<script src="facts.js"></script>
 <script>
 (function () {
   "use strict";
@@ -627,8 +586,7 @@
 
   var el = function (id) { return document.getElementById(id); };
   var screens = ["enter", "breathe", "pause", "ground", "after", "crisis", "about",
-                 "practices", "section", "facts", "reply", "timer", "screening",
-                 "practice", "rate"];
+                 "practices", "section", "timer", "screening", "practice", "rate"];
   var voiceOn = false;
   var SHOW_COUNT = true;
   var tapAt = 0, firstCueAt = 0;
@@ -1076,25 +1034,6 @@
       list.appendChild(b);
     });
 
-    // Двете неща, които не са упражнения и затова нямат секция: нещо за четене и
-    // едно изречение, което човек подготвя предварително.
-    [["Няколко факта", "Какво се случва и защо", "facts", renderFacts],
-     ["Подготвената реплика", "Какво казваш, ако се наложи", "reply", loadReply]
-    ].forEach(function (entry) {
-      var b = document.createElement("button");
-      b.className = "menurow";
-      var left = document.createElement("span");
-      var name = document.createElement("strong");
-      name.textContent = entry[0];
-      var what = document.createElement("span");
-      what.className = "what";
-      what.textContent = entry[1];
-      left.appendChild(name);
-      left.appendChild(what);
-      b.appendChild(left);
-      b.addEventListener("click", function () { entry[3](); show(entry[2]); });
-      list.appendChild(b);
-    });
   }
 
   function openSection(section) {
@@ -1212,6 +1151,9 @@
     el("pstop").textContent = P.practice.stopRule || "";
     el("pstop").style.display = P.practice.stopRule ? "" : "none";
 
+    // Назад има от втората стъпка нататък. Секундите, които държат „Продължи", са
+    // наши и не са одобрени от никого — толкова по-важно е връщането да е възможно.
+    el("pback").style.display = index > 0 ? "" : "none";
     var wants = TIMER_FOR[P.practice.id];
     el("ptimer").style.display = wants ? "" : "none";
     el("prepeat").style.display = voiceOn ? "" : "none";
@@ -1325,6 +1267,9 @@
     if (!canAdvance()) { refreshGate(); return; }
     runStep(P.index + 1);
   });
+  el("pback").addEventListener("click", function () {
+    if (P.index > 0) { runStep(P.index - 1); }
+  });
   el("ptimer").addEventListener("click", function () {
     var wants = TIMER_FOR[P.practice && P.practice.id];
     if (wants) { openTimer(wants[0], wants[1]); }
@@ -1354,63 +1299,12 @@
 
 
   // ------------------------------------------------------------------
-  // Кандидати Г, В и Д от docs/КОНКУРЕНТИ.md
+  // Таймерът — кандидат Д от docs/КОНКУРЕНТИ.md
+  //
+  // Фактите и подготвената реплика ги имаше тук до 4 октомври 2026 г. Махнати са:
+  // не са упражнения и мястото им не беше в приложение, което се отваря, за да се
+  // направи нещо. Текстът им остава в content/психообразование.md.
   // ------------------------------------------------------------------
-
-  // Г · Фактите. Написани са в content/психообразование.md, пренесени са оттам и се
-  // четат, а не се изпълняват — затова не са практики и нямат стъпки.
-  function renderFacts() {
-    var list = el("factlist"), facts = window.MINAVA_FACTS || [], lastGroup = null;
-    list.innerHTML = "";
-
-    facts.forEach(function (fact) {
-      var card = document.createElement("div");
-      card.className = "fact";
-      if (fact.group !== lastGroup) {
-        lastGroup = fact.group;
-        var g = document.createElement("span");
-        g.className = "group";
-        g.textContent = fact.group;
-        card.appendChild(g);
-      }
-      var h = document.createElement("h4");
-      h.textContent = fact.title;
-      var body = document.createElement("p");
-      body.textContent = fact.body;
-      card.appendChild(h);
-      card.appendChild(body);
-      list.appendChild(card);
-    });
-  }
-
-  // В · Подготвената реплика. Единственото място в приложението, където човек пише.
-  // Условията, при които това е допустимо, са в docs/ДАННИ.md: само на този телефон,
-  // никога в износа, никога в синхрона, изтрива се с всичко останало.
-  var REPLY_KEY = "minava.reply";
-
-  function loadReply() {
-    var saved = "";
-    try { saved = localStorage.getItem(REPLY_KEY) || ""; } catch (e) {}
-    el("replytext").value = saved;
-    el("replysaved").textContent = saved
-      ? "Запазено на този телефон. Не отива никъде."
-      : "";
-  }
-
-  el("replysave").addEventListener("click", function () {
-    var value = el("replytext").value.trim();
-    try {
-      if (value) { localStorage.setItem(REPLY_KEY, value); }
-      else { localStorage.removeItem(REPLY_KEY); }
-    } catch (e) {}
-    loadReply();
-  });
-
-  el("replyclear").addEventListener("click", function () {
-    el("replytext").value = "";
-    try { localStorage.removeItem(REPLY_KEY); } catch (e) {}
-    loadReply();
-  });
 
   // Д · Таймер с край. „Прозорец за притеснение" иска точно това и днес разчиташе
   // на телефона. Таймер, който свършва, е част от упражнението, а не удобство.
@@ -1454,8 +1348,6 @@
     paintTimer();
   });
 
-  renderFacts();
-  loadReply();
 
   paintPersonal();
   renderMenu();
@@ -1470,7 +1362,7 @@
   // Версията на прототипа. Вдига се заедно с името на кеша в sw.js, а
   // tools/sync_prototype.py --check проваля билда, ако двете се разминат — иначе
   // ще обещава обновяване, което не е стигнало до телефона.
-  var BUILD = 7;
+  var BUILD = 8;
 
   el("build").textContent = "прототип " + BUILD + " · " +
                             CATALOGUE.length + " упражнения";
