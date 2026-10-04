@@ -17,6 +17,8 @@ public struct ExecutablePractice: Equatable, Sendable {
     /// Which group of the catalogue it appears under. Never nil for a practice that ran the
     /// gate — `structuralDefect()` refuses a practice without one.
     public let section: ClinicalProtocol.Section
+    /// Present on a ladder. The steps are then rungs, easiest first.
+    public let situation: String?
     public let title: LocalizedText
     /// Roughly how long it takes, shown next to the name.
     public let estimatedMinutes: Int?
@@ -61,6 +63,7 @@ public struct ExecutablePractice: Equatable, Sendable {
         self.kind = file.kind
         // Safe: a practice without a section is a structural defect and was refused above.
         self.section = file.section ?? .nervousSystem
+        self.situation = file.situation
         self.title = file.title
         self.estimatedMinutes = file.estimatedMinutes
         self.stopRule = file.stopRule
@@ -106,6 +109,10 @@ public struct ExecutablePractice: Equatable, Sendable {
         public let round: Int
         public let side: ClinicalProtocol.Side?
     }
+
+    /// A ladder is climbed one rung at a time, over days — not run end to end like the
+    /// other practices. The interface treats it differently and needs to know.
+    public var isLadder: Bool { kind == .exposure && situation != nil }
 
     /// The shortest the practice can take, when every step is held for its minimum.
     ///

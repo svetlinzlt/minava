@@ -1,0 +1,75 @@
+{
+  "approval": null,
+  "estimatedMinutes": 15,
+  "id": "ladder-crowd",
+  "kind": "exposure",
+  "measure": "activation-0-10",
+  "notes": "Кандидат А от docs/КОНКУРЕНТИ.md и първата стълба. Dare има същото като „Challenges“, MindShift — като „стълба на страха“. СТРУКТУРАТА е наша и е механизъм; РЕДЪТ И СЪДЪРЖАНИЕТО на стъпалата са клинични и чакат 6.3. Липсва excludedBy, защото екраниращите въпроси са 6.4 и още не съществуват. Не излиза от clinical/personal/ и не влиза в публичния прототип.",
+  "preparation": [
+    {
+      "minDuration": 10,
+      "text": {
+        "bg": "Не днес, ако си изтощен или вече напрегнат."
+      }
+    },
+    {
+      "minDuration": 10,
+      "text": {
+        "bg": "Едно стъпало наведнъж. Не през едно."
+      }
+    }
+  ],
+  "recoveryProtocol": "shoulders-belly-release",
+  "schemaVersion": 1,
+  "section": "challenge",
+  "situation": "crowd",
+  "status": "draft",
+  "steps": [
+    {
+      "minDuration": 120,
+      "text": {
+        "bg": "Улица в тих час, пет минути."
+      }
+    },
+    {
+      "minDuration": 120,
+      "text": {
+        "bg": "Малък магазин, когато е празен."
+      }
+    },
+    {
+      "minDuration": 120,
+      "text": {
+        "bg": "Същият магазин в обичаен час."
+      }
+    },
+    {
+      "minDuration": 120,
+      "text": {
+        "bg": "Голям магазин, една пътека."
+      }
+    },
+    {
+      "minDuration": 120,
+      "text": {
+        "bg": "Голям магазин, опашка на касата."
+      }
+    },
+    {
+      "minDuration": 120,
+      "text": {
+        "bg": "Транспорт, една спирка."
+      }
+    },
+    {
+      "minDuration": 120,
+      "text": {
+        "bg": "Транспорт в натоварен час."
+      }
+    }
+  ],
+  "title": {
+    "bg": "Стълба: тълпа"
+  },
+  "version": 1
+}

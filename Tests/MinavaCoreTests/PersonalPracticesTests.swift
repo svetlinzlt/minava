@@ -94,7 +94,7 @@ final class PersonalPracticesTests: XCTestCase {
                           "\(name) сочи към \(recovery), а такава практика няма")
         }
 
-        XCTAssertEqual(exposures, 1, "очаква се точно една експозиционна практика")
+        XCTAssertGreaterThan(exposures, 0, "очаква се поне една експозиционна практика")
     }
 
     /// Load-time half of the same rule: if the recovery practice is missing from the folder,
@@ -173,6 +173,31 @@ final class PersonalPracticesTests: XCTestCase {
         XCTAssertTrue(library.groups.allSatisfy { !$0.practices.isEmpty })
         XCTAssertEqual(library.groups.reduce(0) { $0 + $1.practices.count },
                        library.practices.count)
+    }
+
+    // MARK: - Стълбите
+
+    /// Ситуациите са готов списък и това е целият смисъл: човек избира, не пише, и нищо
+    /// написано от него не влиза в хранилището.
+    func testEveryLadderPointsAtAKnownSituation() throws {
+        let data = try Fixtures.data(at: "content/спусъци.json")
+        let object = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        let triggers = (object?["triggers"] as? [[String: Any]]) ?? []
+        let known = Set(triggers.compactMap { $0["id"] as? String })
+        XCTAssertFalse(known.isEmpty)
+
+        var ladders = 0
+        for (name, file) in try documents() where file.situation != nil {
+            ladders += 1
+            let situation = try XCTUnwrap(file.situation, name)
+            XCTAssertTrue(known.contains(situation),
+                          "\(name) сочи към ситуация \(situation), каквато няма в списъка")
+            XCTAssertEqual(file.kind, .exposure, "\(name): стълба без експозиция")
+            XCTAssertTrue(file.isLadder, name)
+            XCTAssertGreaterThanOrEqual((file.steps ?? []).count, 2,
+                                        "\(name): стълба с едно стъпало не е стълба")
+        }
+        XCTAssertGreaterThan(ladders, 0, "очаква се поне една стълба")
     }
 
     func testAPersonalBuildAllowsUnapprovedContentButReleaseDoesNot() {

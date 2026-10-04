@@ -28,6 +28,8 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SOURCE_DIR = os.path.join(ROOT, "clinical", "personal")
 TARGET = os.path.join(ROOT, "docs", "prototype", "practices.js")
+FACTS_SOURCE = os.path.join(ROOT, "content", "психообразование.md")
+FACTS_TARGET = os.path.join(ROOT, "docs", "prototype", "facts.js")
 
 # Видовете, които прототипът има право да показва.
 PUBLISHABLE_KINDS = ("regulation", "grounding")
@@ -143,6 +145,46 @@ def rendered(practices):
     return HEADER + body + u";\n"
 
 
+FACTS_HEADER = u"""// Генериран файл. Не се редактира на ръка.
+//
+// Източник: content/психообразование.md. Пренася се от tools/sync_prototype.py.
+// Разделът „Какво нарочно не влиза" остава извън екрана — той е за нас, не за човека.
+window.MINAVA_FACTS = """
+
+
+def collect_facts():
+    """Изважда фактите от психообразованието като отделни късчета за екрана.
+
+    Текстът е написан за четене от файл; на телефон се чете по един факт. Разделянето
+    е механично — всеки удебелен начален израз е заглавие — за да няма два текста,
+    които се разминават.
+    """
+    if not os.path.exists(FACTS_SOURCE):
+        return []
+    text = io.open(FACTS_SOURCE, encoding="utf-8").read()
+
+    facts, group = [], None
+    for line in text.splitlines():
+        if line.startswith("## "):
+            group = line[3:].strip()
+            continue
+        head = re.match(r"^\*\*(.+?)\.\*\*\s*(.*)$", line)
+        if head and group and group != u"Какво нарочно не влиза":
+            facts.append({"group": group, "title": head.group(1), "body": head.group(2)})
+        elif (facts and line.strip() and not line.startswith(("#", "-", "|", ">", "**"))
+              and facts[-1]["body"] and len(facts[-1]["body"]) < 400):
+            facts[-1]["body"] += " " + line.strip()
+
+    for fact in facts:
+        fact["body"] = re.sub(r"\*\*(.+?)\*\*", r"\1", fact["body"]).strip()
+    return facts
+
+
+def rendered_facts(facts):
+    body = json.dumps(facts, ensure_ascii=False, indent=2, sort_keys=True)
+    return FACTS_HEADER + body + u";\n"
+
+
 def versions():
     """Номерът на версията в страницата и името на кеша в service worker-а.
 
@@ -182,24 +224,35 @@ def main():
         print("ГРЕШКА няма нито една практика за прототипа")
         return 1
 
-    existing = None
-    if os.path.exists(TARGET):
-        existing = io.open(TARGET, encoding="utf-8").read()
+    facts = collect_facts()
+    facts_text = rendered_facts(facts)
+    if not facts:
+        print("ГРЕШКА няма нито един факт за прототипа")
+        return 1
+
+    def current(path):
+        return io.open(path, encoding="utf-8").read() if os.path.exists(path) else None
+
+    targets = ((TARGET, text, "clinical/personal/"),
+               (FACTS_TARGET, facts_text, "content/психообразование.md"))
 
     if check:
-        if existing != text:
-            print("ГРЕШКА docs/prototype/practices.js не е в крак с clinical/personal/ — "
-                  "пусни python tools/sync_prototype.py")
-            return 1
-        print("прототипът е в крак: %d практики" % len(practices))
+        for path, body, source in targets:
+            if current(path) != body:
+                print("ГРЕШКА %s не е в крак с %s — пусни python tools/sync_prototype.py"
+                      % (os.path.relpath(path, ROOT).replace(os.sep, "/"), source))
+                return 1
+        print("прототипът е в крак: %d практики, %d факта" % (len(practices), len(facts)))
         return 0
 
-    if existing != text:
-        with io.open(TARGET, "w", encoding="utf-8", newline="\n") as handle:
-            handle.write(text)
-        print("записани %d практики в docs/prototype/practices.js" % len(practices))
-    else:
-        print("без промяна: %d практики" % len(practices))
+    for path, body, _ in targets:
+        relative = os.path.relpath(path, ROOT).replace(os.sep, "/")
+        if current(path) != body:
+            with io.open(path, "w", encoding="utf-8", newline="\n") as handle:
+                handle.write(body)
+            print("записан %s" % relative)
+
+    print("готово: %d практики, %d факта" % (len(practices), len(facts)))
     return 0
 
 
